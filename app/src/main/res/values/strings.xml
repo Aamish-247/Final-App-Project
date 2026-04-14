@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Final Project (Smart Bus Tracking System)</string>
+    <string name="admin_dashboard">Admin Dashboard</string>
+    <string name="select_an_option_to_manage_the_system">Select an option to manage the system</string>
+    <string name="manage_users_drivers_and_parents"><![CDATA[Manage Users (Drivers & Parents)]]></string>
+    <string name="manage_fleet_and_routes">Manage Fleet and Routes</string>
+    <string name="live_bus_tracking">Live Bus Tracking</string>
+    <string name="broadcast_and_alerts">Broadcast and Alerts</string>
+    <string name="logout">Logout</string>
 </resources>

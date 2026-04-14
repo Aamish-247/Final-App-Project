@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#F3F6FB">
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Admin Dashboard"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#1A1A1A"
+        android:gravity="center"
+        android:layout_marginTop="10dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Select an option"
+        android:textSize="14sp"
+        android:textColor="#666"
+        android:gravity="center"
+        android:layout_marginBottom="20dp"/>
+
+    <!-- GRID -->
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:columnCount="2">
+
+        <!-- USER -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_manage_users"
+            android:layout_width="0dp"
+            android:layout_height="110dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:text="User"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#000"
+            app:backgroundTint="#E3F2FD"
+            app:cornerRadius="16dp"
+            app:icon="@drawable/ic_people"
+            app:iconTint="#2196F3"
+            app:iconGravity="top"
+            app:iconSize="40dp"
+            app:iconPadding="8dp"/>
+
+        <!-- BUS -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_manage_fleet"
+            android:layout_width="0dp"
+            android:layout_height="110dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:text="Bus"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#000"
+            app:backgroundTint="#E8F5E9"
+            app:cornerRadius="16dp"
+            app:icon="@drawable/ic_bus"
+            app:iconTint="#4CAF50"
+            app:iconGravity="top"
+            app:iconSize="40dp"
+            app:iconPadding="8dp"/>
+
+        <!-- MAP -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_live_tracking"
+            android:layout_width="0dp"
+            android:layout_height="110dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:text="Map"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#000"
+            app:backgroundTint="#FFF3E0"
+            app:cornerRadius="16dp"
+            app:icon="@drawable/ic_map"
+            app:iconTint="#FF9800"
+            app:iconGravity="top"
+            app:iconSize="40dp"
+            app:iconPadding="8dp"/>
+
+        <!-- NOTIFICATION -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_send_alerts"
+            android:layout_width="0dp"
+            android:layout_height="110dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:text="Alerts"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#000"
+            app:backgroundTint="#FCE4EC"
+            app:cornerRadius="16dp"
+            app:icon="@drawable/ic_notifications"
+            app:iconTint="#E91E63"
+            app:iconGravity="top"
+            app:iconSize="40dp"
+            app:iconPadding="8dp"/>
+
+    </GridLayout>
+
+    <!-- LOGOUT -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_logout"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="40dp"
+        android:text="Logout"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        app:backgroundTint="#F44336"
+        app:cornerRadius="20dp"
+        app:icon="@drawable/ic_logout"
+        app:iconTint="#FFFFFF"
+        app:iconGravity="textStart"
+        app:iconPadding="8dp"/>
+
+</LinearLayout>
