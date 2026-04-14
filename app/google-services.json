@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "178893523212",
+    "project_id": "final-bus-tracking-system",
+    "storage_bucket": "final-bus-tracking-system.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:178893523212:android:76dc3c7846bac370bea129",
+        "android_client_info": {
+          "package_name": "com.example.finalprojectsmartbustrackingsystem"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCd8sQMEPvsAc1RuomLLw_riv7EVWMAEYc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
