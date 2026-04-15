@@ -28,7 +28,8 @@ class AdminDashboard : AppCompatActivity() {
 
         // 2. Manage Fleet (Abhi features pending hain)
         btnBus.setOnClickListener {
-            Toast.makeText(this, "Fleet Management Coming Soon", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, ManageFleetActivity::class.java)
+            startActivity(intent)
         }
 
         // 3. Live Tracking (Map functionality pending)
