@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:gravity="center"
+    android:background="#F4F7FE">
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="User Management"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#1A1A1A"
+        android:layout_marginBottom="6dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Choose a category to manage"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:layout_marginBottom="30dp"/>
+
+    <!-- Drivers -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_manage_drivers"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:text="Manage Drivers"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        app:backgroundTint="#4A90E2"
+        app:cornerRadius="18dp"
+        android:layout_marginBottom="15dp"
+        android:elevation="4dp"/>
+
+    <!-- Parents -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_manage_parents"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:text="Manage Parents"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        app:backgroundTint="#50C878"
+        app:cornerRadius="18dp"
+        android:layout_marginBottom="15dp"
+        android:elevation="4dp"/>
+
+    <!-- Assign Students -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_assign_students"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:text="Assign Students to Bus"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        app:backgroundTint="#FF8C42"
+        app:cornerRadius="18dp"
+        android:elevation="4dp"/>
+
+</LinearLayout>

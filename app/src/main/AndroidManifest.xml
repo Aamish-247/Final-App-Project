@@ -21,6 +21,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FinalProjectSmartBusTrackingSystem">
         <activity
+            android:name=".AddParentActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ManageParentsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AddDriverActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ManageDriversActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ManageUsersActivity"
+            android:exported="false" />
+        <activity
             android:name=".ParentDashboard"
             android:exported="false"
             android:label="Parent Dashboard" />
