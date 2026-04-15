@@ -21,6 +21,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FinalProjectSmartBusTrackingSystem">
         <activity
+            android:name=".AssignedStudentsListActivity"
+            android:exported="false" />
+        <activity
             android:name=".AssignStudentActivity"
             android:exported="false" />
         <activity

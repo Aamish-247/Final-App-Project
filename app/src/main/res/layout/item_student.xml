@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="#4A90E2"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@+id/layout_actions_student">
+
+            <TextView
+                android:id="@+id/tv_student_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Student Name"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#1A1A1A"/>
+
+            <TextView
+                android:id="@+id/tv_student_bus_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bus: Bus 01"
+                android:textSize="14sp"
+                android:textColor="#FF9F43"
+                android:textStyle="bold"
+                android:layout_marginTop="6dp"/>
+
+            <TextView
+                android:id="@+id/tv_student_driver_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Driver: Driver Name"
+                android:textSize="14sp"
+                android:textColor="#555555"
+                android:layout_marginTop="2dp"/>
+
+            <TextView
+                android:id="@+id/tv_student_parent_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Parent: Parent Name"
+                android:textSize="14sp"
+                android:textColor="#555555"
+                android:layout_marginTop="2dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_actions_student"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:orientation="horizontal">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="#FFEBEE">
+
+                <ImageView
+                    android:id="@+id/iv_delete_student"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_delete"
+                    app:tint="#E53935"/>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </RelativeLayout>
+</com.google.android.material.card.MaterialCardView>

@@ -21,6 +21,9 @@ class ManageDriversActivity : AppCompatActivity() {
     private lateinit var dbRef: DatabaseReference
     private lateinit var driverList: ArrayList<DriverModel>
 
+    // Naya Variable: Adapter ko class level par define kiya hai
+    private lateinit var driverAdapter: RecyclerView.Adapter<DriverViewHolder>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_manage_drivers)
@@ -32,6 +35,10 @@ class ManageDriversActivity : AppCompatActivity() {
         driverList = arrayListOf<DriverModel>()
         dbRef = FirebaseDatabase.getInstance().getReference("users")
 
+        // 1. Adapter ko sirf ek dafa initialize karna
+        initAdapter()
+
+        // 2. Data mangwana
         getDriversData()
 
         findViewById<MaterialButton>(R.id.btn_add_new_driver).setOnClickListener {
@@ -39,28 +46,8 @@ class ManageDriversActivity : AppCompatActivity() {
         }
     }
 
-    private fun getDriversData() {
-        // Sirf un users ko filter karna jinka role 'driver' hai
-        dbRef.orderByChild("role").equalTo("driver")
-            .addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    driverList.clear()
-                    if (snapshot.exists()) {
-                        for (driverSnap in snapshot.children) {
-                            val data = driverSnap.getValue(DriverModel::class.java)
-                            driverList.add(data!!)
-                        }
-                        setupAdapter()
-                    }
-                }
-                override fun onCancelled(error: DatabaseError) {
-                    Toast.makeText(this@ManageDriversActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
-                }
-            })
-    }
-
-    private fun setupAdapter() {
-        val adapter = object : RecyclerView.Adapter<DriverViewHolder>() {
+    private fun initAdapter() {
+        driverAdapter = object : RecyclerView.Adapter<DriverViewHolder>() {
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DriverViewHolder {
                 val view = LayoutInflater.from(parent.context).inflate(R.layout.item_driver, parent, false)
                 return DriverViewHolder(view)
@@ -76,16 +63,22 @@ class ManageDriversActivity : AppCompatActivity() {
                     val builder = AlertDialog.Builder(this@ManageDriversActivity)
                     builder.setTitle("Delete Driver")
                     builder.setMessage("Do you want to delete ${current.name} from the list?")
-                    builder.setPositiveButton("Yes, Delete") { _, _ ->
+                    builder.setPositiveButton("Yes, Delete") { dialog, _ ->
                         // Firebase se record delete karna
                         current.uid?.let { uid ->
                             dbRef.child(uid).removeValue()
                                 .addOnSuccessListener {
-                                    Toast.makeText(this@ManageDriversActivity, "Driver Deleted", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(this@ManageDriversActivity, "Driver Deleted Successfully", Toast.LENGTH_SHORT).show()
+                                }
+                                .addOnFailureListener {
+                                    Toast.makeText(this@ManageDriversActivity, "Error: ${it.message}", Toast.LENGTH_SHORT).show()
                                 }
                         }
+                        dialog.dismiss()
                     }
-                    builder.setNegativeButton("Cancel", null)
+                    builder.setNegativeButton("Cancel") { dialog, _ ->
+                        dialog.dismiss()
+                    }
                     builder.show()
                 }
 
@@ -104,9 +97,32 @@ class ManageDriversActivity : AppCompatActivity() {
 
             override fun getItemCount(): Int = driverList.size
         }
-        rvDrivers.adapter = adapter
+
+        // RecyclerView ko adapter assign kar diya
+        rvDrivers.adapter = driverAdapter
     }
 
+    private fun getDriversData() {
+        // Sirf un users ko filter karna jinka role 'driver' hai
+        dbRef.orderByChild("role").equalTo("driver")
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    driverList.clear() // Purani list saaf ki
+                    if (snapshot.exists()) {
+                        for (driverSnap in snapshot.children) {
+                            val data = driverSnap.getValue(DriverModel::class.java)
+                            data?.let { driverList.add(it) }
+                        }
+                    }
+                    // MAIN FIX: Adapter ko batana ke data update ho gaya hai taake wo fauran UI refresh kare
+                    driverAdapter.notifyDataSetChanged()
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(this@ManageDriversActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
+    }
 
     class DriverViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val name: TextView = itemView.findViewById(R.id.tv_display_name)

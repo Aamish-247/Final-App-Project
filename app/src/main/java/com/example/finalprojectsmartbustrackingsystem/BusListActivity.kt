@@ -21,6 +21,9 @@ class BusListActivity : AppCompatActivity() {
     private lateinit var dbRef: DatabaseReference
     private lateinit var busList: ArrayList<BusModel>
 
+    // Naya Variable: Adapter ko class level par define kiya
+    private lateinit var busAdapter: RecyclerView.Adapter<BusViewHolder>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bus_list)
@@ -33,7 +36,10 @@ class BusListActivity : AppCompatActivity() {
         busList = arrayListOf<BusModel>()
         dbRef = FirebaseDatabase.getInstance().getReference("buses")
 
-        // Fetch Data from Firebase
+        // 1. Adapter ko sirf ek dafa initialize karna
+        initAdapter()
+
+        // 2. Fetch Data from Firebase
         getBusesData()
 
         // Add New Bus Button Click
@@ -43,27 +49,8 @@ class BusListActivity : AppCompatActivity() {
         }
     }
 
-    private fun getBusesData() {
-        dbRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                busList.clear()
-                if (snapshot.exists()) {
-                    for (busSnap in snapshot.children) {
-                        val data = busSnap.getValue(BusModel::class.java)
-                        data?.let { busList.add(it) }
-                    }
-                    setupAdapter()
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@BusListActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
-    private fun setupAdapter() {
-        val adapter = object : RecyclerView.Adapter<BusViewHolder>() {
+    private fun initAdapter() {
+        busAdapter = object : RecyclerView.Adapter<BusViewHolder>() {
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BusViewHolder {
                 val view = LayoutInflater.from(parent.context).inflate(R.layout.item_bus, parent, false)
                 return BusViewHolder(view)
@@ -79,8 +66,8 @@ class BusListActivity : AppCompatActivity() {
                 holder.btnDelete.setOnClickListener {
                     val builder = AlertDialog.Builder(this@BusListActivity)
                     builder.setTitle("Delete Bus")
-                    builder.setMessage("Do you want to delete ${current.busName} from the list? ")
-                    builder.setPositiveButton("Yes, Delete") { _, _ ->
+                    builder.setMessage("Do you want to delete ${current.busName} from the list?")
+                    builder.setPositiveButton("Yes, Delete") { dialog, _ ->
                         current.busId?.let { id ->
                             dbRef.child(id).removeValue()
                                 .addOnSuccessListener {
@@ -90,8 +77,11 @@ class BusListActivity : AppCompatActivity() {
                                     Toast.makeText(this@BusListActivity, "Error: ${it.message}", Toast.LENGTH_SHORT).show()
                                 }
                         }
+                        dialog.dismiss()
                     }
-                    builder.setNegativeButton("Cancel", null)
+                    builder.setNegativeButton("Cancel") { dialog, _ ->
+                        dialog.dismiss()
+                    }
                     builder.show()
                 }
 
@@ -109,7 +99,29 @@ class BusListActivity : AppCompatActivity() {
 
             override fun getItemCount(): Int = busList.size
         }
-        rvBuses.adapter = adapter
+
+        // RecyclerView ko adapter assign karna
+        rvBuses.adapter = busAdapter
+    }
+
+    private fun getBusesData() {
+        dbRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                busList.clear()
+                if (snapshot.exists()) {
+                    for (busSnap in snapshot.children) {
+                        val data = busSnap.getValue(BusModel::class.java)
+                        data?.let { busList.add(it) }
+                    }
+                }
+                // MAIN FIX: Adapter ko data change hone ka signal dena
+                busAdapter.notifyDataSetChanged()
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(this@BusListActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
     // ViewHolder class to link item_bus.xml views

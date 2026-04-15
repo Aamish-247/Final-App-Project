@@ -1,10 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AssignStudentActivity">
+    android:background="#F4F8FE"> <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Assign Student"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="#1A1A1A"
+        android:gravity="center"
+        android:layout_marginTop="10dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Link student with parent, bus, and driver"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:gravity="center"
+        android:layout_marginBottom="30dp"/>
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:boxStrokeColor="#4A90E2">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_student_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Student Full Name"
+            android:inputType="textPersonName"
+            android:textColor="#000000"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:boxStrokeColor="#4A90E2">
+
+        <AutoCompleteTextView
+            android:id="@+id/spinner_select_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Select Parent"
+            android:inputType="none"
+            android:textColor="#000000"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:boxStrokeColor="#4A90E2">
+
+        <AutoCompleteTextView
+            android:id="@+id/spinner_select_bus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Select Bus"
+            android:inputType="none"
+            android:textColor="#000000"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:boxStrokeColor="#4A90E2">
+
+        <AutoCompleteTextView
+            android:id="@+id/spinner_select_driver"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Select Driver"
+            android:inputType="none"
+            android:textColor="#000000"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_assign_student"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:text="CONFIRM ASSIGNMENT"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        app:backgroundTint="#FF9F43"
+        app:cornerRadius="12dp"
+        app:elevation="4dp"/>
+
+</LinearLayout>
+</ScrollView>

@@ -31,7 +31,8 @@ class ManageUsersActivity : AppCompatActivity() {
 
         // 3. Assign Students Button
         btnAssignStudents.setOnClickListener {
-            Toast.makeText(this, "Opening Student Assignment...", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, AssignedStudentsListActivity::class.java)
+            startActivity(intent)
         }
     }
 }
