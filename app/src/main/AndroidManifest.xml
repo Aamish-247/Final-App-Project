@@ -21,45 +21,45 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FinalProjectSmartBusTrackingSystem">
         <activity
-            android:name=".AssignedStudentsListActivity"
+            android:name=".Admin_Dashboard.AssignedStudentsListActivity"
             android:exported="false" />
         <activity
-            android:name=".AssignStudentActivity"
+            android:name=".Admin_Dashboard.AssignStudentActivity"
             android:exported="false" />
         <activity
-            android:name=".BusListActivity"
+            android:name=".Admin_Dashboard.BusListActivity"
             android:exported="false" />
         <activity
-            android:name=".AddBusActivity"
+            android:name=".Admin_Dashboard.AddBusActivity"
             android:exported="false" />
         <activity
-            android:name=".ManageFleetActivity"
+            android:name=".Admin_Dashboard.ManageFleetActivity"
             android:exported="false" />
         <activity
-            android:name=".AddParentActivity"
+            android:name=".Admin_Dashboard.AddParentActivity"
             android:exported="false" />
         <activity
-            android:name=".ManageParentsActivity"
+            android:name=".Admin_Dashboard.ManageParentsActivity"
             android:exported="false" />
         <activity
-            android:name=".AddDriverActivity"
+            android:name=".Admin_Dashboard.AddDriverActivity"
             android:exported="false" />
         <activity
-            android:name=".ManageDriversActivity"
+            android:name=".Admin_Dashboard.ManageDriversActivity"
             android:exported="false" />
         <activity
-            android:name=".ManageUsersActivity"
+            android:name=".Admin_Dashboard.ManageUsersActivity"
             android:exported="false" />
         <activity
-            android:name=".ParentDashboard"
+            android:name=".Admin_Dashboard.ParentDashboard"
             android:exported="false"
             android:label="Parent Dashboard" />
         <activity
-            android:name=".DriverDashboard"
+            android:name=".Admin_Dashboard.DriverDashboard"
             android:exported="false"
             android:label="Driver Dashboard" />
         <activity
-            android:name=".AdminDashboard"
+            android:name=".Admin_Dashboard.AdminDashboard"
             android:exported="false"
             android:label="Admin Dashboard" />
 
@@ -68,7 +68,7 @@
             android:value="YOUR_GOOGLE_MAPS_API_KEY_HERE" />
 
         <activity
-            android:name=".LoginActivity"
+            android:name=".Admin_Dashboard.LoginActivity"
             android:exported="true"
             android:label="Login">
             <intent-filter>
