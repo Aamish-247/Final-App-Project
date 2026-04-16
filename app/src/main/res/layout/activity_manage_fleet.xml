@@ -70,25 +70,15 @@
         android:layout_marginBottom="15dp"/>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_menu_schedule"
-        style="@style/Widget.MaterialComponents.Button"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:text="TIMINGS and SCHEDULE"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="#FFFFFF"
-        app:backgroundTint="#9C27B0"
-        app:cornerRadius="10dp"
-        app:elevation="4dp"/>
-    <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_assign_student_stops"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="70dp"
         android:text="Assign Stops to Students"
-        app:cornerRadius="8dp"
+        app:cornerRadius="10dp"
         android:textSize="16sp"
         android:textStyle="bold"
         android:textColor="#FFFFFF"
+        app:backgroundTint="#4E49FF"
+        app:elevation="4dp"
         android:layout_marginTop="10dp"/>
 </LinearLayout>

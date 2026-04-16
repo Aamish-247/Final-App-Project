@@ -17,7 +17,6 @@ class ManageFleetActivity : AppCompatActivity() {
         val btnManageBuses = findViewById<MaterialButton>(R.id.btn_menu_add_bus)
         val btnDefineRoute = findViewById<MaterialButton>(R.id.btn_menu_define_route)
         val btnAssignDriver = findViewById<MaterialButton>(R.id.btn_menu_assign_driver)
-        val btnSchedule = findViewById<MaterialButton>(R.id.btn_menu_schedule)
         val btnAssignStops = findViewById<MaterialButton>(R.id.btn_assign_student_stops)
 
         // 1. Manage Buses
@@ -34,12 +33,8 @@ class ManageFleetActivity : AppCompatActivity() {
 
         // 3. Assign Driver to Bus
         btnAssignDriver.setOnClickListener {
-            Toast.makeText(this, "Opening Driver Assignment...", Toast.LENGTH_SHORT).show()
-        }
-
-        // 4. Timings & Schedule
-        btnSchedule.setOnClickListener {
-            Toast.makeText(this, "Opening Schedule Manager...", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, AssignDriverActivity::class.java)
+            startActivity(intent)
         }
 
         // 5. Assign Stops to Students (NEW BUTTON)
