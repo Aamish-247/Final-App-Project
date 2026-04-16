@@ -58,6 +58,22 @@
                 android:textSize="14sp"
                 android:textColor="#555555"
                 android:layout_marginTop="2dp"/>
+            <TextView
+                android:id="@+id/tv_student_pickup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pickup: Pending"
+                android:textColor="#2E7D32"
+                android:textStyle="bold"
+                android:layout_marginTop="4dp"/>
+
+            <TextView
+                android:id="@+id/tv_student_dropoff"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Drop-off: Pending"
+                android:textColor="#C62828"
+                android:textStyle="bold"/>
         </LinearLayout>
 
         <LinearLayout

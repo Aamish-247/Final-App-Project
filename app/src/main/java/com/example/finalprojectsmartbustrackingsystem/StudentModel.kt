@@ -8,5 +8,7 @@ data class StudentModel(
     val busId: String? = "",
     val busName: String? = "",
     val driverId: String? = "",
-    val driverName: String? = ""
+    val driverName: String? = "",
+    val pickupStop: String? = null,
+    val dropoffStop: String? = null
 )

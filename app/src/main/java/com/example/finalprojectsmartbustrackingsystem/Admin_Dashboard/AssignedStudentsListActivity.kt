@@ -63,6 +63,15 @@ class AssignedStudentsListActivity : AppCompatActivity() {
                 holder.driverName.text = "Driver: ${current.driverName ?: "Not Assigned"}"
                 holder.parentName.text = "Parent: ${current.parentName ?: "Not Assigned"}"
 
+                // === NAYA HISSA: Pickup & Drop-off Show Karna ===
+                // Agar point save nahi hua (null hai) toh "Pending" show karega
+                val pickup = current.pickupStop?.replace("_", " ")?.capitalize() ?: "Pending"
+                val dropoff = current.dropoffStop?.replace("_", " ")?.capitalize() ?: "Pending"
+
+                holder.pickupInfo.text = "Pickup: $pickup"
+                holder.dropoffInfo.text = "Drop-off: $dropoff"
+
+
                 // --- DELETE LOGIC ---
                 holder.btnDelete.setOnClickListener {
                     val builder = AlertDialog.Builder(this@AssignedStudentsListActivity)
@@ -121,6 +130,11 @@ class AssignedStudentsListActivity : AppCompatActivity() {
         val busInfo: TextView = itemView.findViewById(R.id.tv_student_bus_info)
         val driverName: TextView = itemView.findViewById(R.id.tv_student_driver_name)
         val parentName: TextView = itemView.findViewById(R.id.tv_student_parent_name)
+
+        // === Naye Views Link Kiye ===
+        val pickupInfo: TextView = itemView.findViewById(R.id.tv_student_pickup)
+        val dropoffInfo: TextView = itemView.findViewById(R.id.tv_student_dropoff)
+
         val btnDelete: ImageView = itemView.findViewById(R.id.iv_delete_student)
     }
 }

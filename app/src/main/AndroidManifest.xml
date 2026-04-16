@@ -21,6 +21,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FinalProjectSmartBusTrackingSystem">
         <activity
+            android:name=".Admin_Dashboard.AssignPointsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Admin_Dashboard.DefineRouteActivity"
+            android:exported="false" />
+        <activity
             android:name=".Admin_Dashboard.AssignedStudentsListActivity"
             android:exported="false" />
         <activity

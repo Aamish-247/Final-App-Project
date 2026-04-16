@@ -81,5 +81,14 @@
         app:backgroundTint="#9C27B0"
         app:cornerRadius="10dp"
         app:elevation="4dp"/>
-
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_assign_student_stops"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="Assign Stops to Students"
+        app:cornerRadius="8dp"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="10dp"/>
 </LinearLayout>
