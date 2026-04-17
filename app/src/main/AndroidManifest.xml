@@ -21,6 +21,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FinalProjectSmartBusTrackingSystem">
         <activity
+            android:name=".Admin_Dashboard.BroadcastAlertsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Admin_Dashboard.LiveTrackingActivity"
+            android:exported="false" />
+        <activity
             android:name=".Admin_Dashboard.AssignDriverActivity"
             android:exported="false" />
         <activity

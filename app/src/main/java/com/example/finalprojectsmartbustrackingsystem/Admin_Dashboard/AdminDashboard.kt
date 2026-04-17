@@ -35,12 +35,14 @@ class AdminDashboard : AppCompatActivity() {
 
         // 3. Live Tracking (Map functionality pending)
         btnMap.setOnClickListener {
-            Toast.makeText(this, "Live Tracking Coming Soon", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, LiveTrackingActivity::class.java)
+            startActivity(intent)
         }
 
         // 4. Notifications/Alerts (Pending)
         btnNotif.setOnClickListener {
-            Toast.makeText(this, "Alerts System Coming Soon", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, BroadcastAlertsActivity::class.java)
+            startActivity(intent)
         }
 
         // 5. Logout Functionality
