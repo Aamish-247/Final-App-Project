@@ -6,6 +6,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.finalprojectsmartbustrackingsystem.Driver_Dashboard.DriverDashboard
 import com.example.finalprojectsmartbustrackingsystem.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -42,7 +43,6 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
-
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -50,9 +50,11 @@ class LoginActivity : AppCompatActivity() {
 
                     if (uid == null) {
                         Toast.makeText(this, "User not found", Toast.LENGTH_SHORT).show()
+                        return@addOnCompleteListener
                     }
 
-                    val dbRef = FirebaseDatabase.getInstance().getReference("user").child(uid!!)
+                    // FIX 1: Node name 'users' hona chahiye
+                    val dbRef = FirebaseDatabase.getInstance().getReference("users").child(uid)
 
                     dbRef.get().addOnSuccessListener { snapshot ->
                         if (snapshot.exists()) {
@@ -63,14 +65,16 @@ class LoginActivity : AppCompatActivity() {
                                 return@addOnSuccessListener
                             }
 
-
-                            when (role) {
+                            // FIX 2: Sahi class names ka use
+                            when (role.lowercase()) {
                                 "admin" -> startActivity(Intent(this, AdminDashboard::class.java))
                                 "driver" -> startActivity(Intent(this, DriverDashboard::class.java))
                                 "parent" -> startActivity(Intent(this, ParentDashboard::class.java))
                                 else -> Toast.makeText(this, "Unknown role: $role", Toast.LENGTH_SHORT).show()
                             }
                             finish()
+                        } else {
+                            Toast.makeText(this, "User data not found in database", Toast.LENGTH_SHORT).show()
                         }
                     }
                 } else {

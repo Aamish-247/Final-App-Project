@@ -6,11 +6,14 @@
     android:orientation="vertical"
     android:padding="20dp"
     android:background="#F8F9FA">
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="70dp"/>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Send New Alert"
+        android:text="Alerts and Notifications"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textAlignment="center"
@@ -64,7 +67,7 @@
         android:id="@+id/btn_send_alert"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:text="SEND BROADCAST"
+        android:text="BROADCAST THIS MESSAGE"
         android:textStyle="bold"
         app:cornerRadius="12dp"
         app:backgroundTint="#D32F2F"/>

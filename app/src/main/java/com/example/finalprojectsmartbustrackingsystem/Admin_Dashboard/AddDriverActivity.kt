@@ -14,8 +14,6 @@ import kotlin.random.Random
 class AddDriverActivity : AppCompatActivity() {
 
     private lateinit var mAuth: FirebaseAuth
-
-    // Naye Variables: Check karne ke liye ke hum Edit Mode mein hain ya nahi
     private var isEditMode = false
     private var editUid: String? = null
 
@@ -31,23 +29,19 @@ class AddDriverActivity : AppCompatActivity() {
         val etPassword = findViewById<TextInputEditText>(R.id.et_driver_password)
         val btnSave = findViewById<MaterialButton>(R.id.btn_save_driver)
 
-        // --- EDIT MODE CHECK ---
         val action = intent.getStringExtra("action")
         if (action == "edit") {
             isEditMode = true
             editUid = intent.getStringExtra("uid")
 
-            // Form mein purana data show karwana
             etName.setText(intent.getStringExtra("name"))
             etEmail.setText(intent.getStringExtra("email"))
             etPhone.setText(intent.getStringExtra("phone"))
 
-            // Email aur Password field ko lock kar dena
             etEmail.isEnabled = false
             etPassword.isEnabled = false
             etPassword.hint = "Password is lock for safety"
 
-            // Button ka text badalna
             btnSave.text = "Update Driver"
         }
 
@@ -73,24 +67,17 @@ class AddDriverActivity : AppCompatActivity() {
         }
     }
 
-
     private fun updateDriverData(name: String, phone: String) {
         editUid?.let { uid ->
             val dbRef = FirebaseDatabase.getInstance().getReference("users").child(uid)
-
             val updates = mapOf<String, Any>(
                 "name" to name,
                 "phone" to phone
             )
-
-            dbRef.updateChildren(updates)
-                .addOnSuccessListener {
-                    Toast.makeText(this, "Driver Updated Successfully!", Toast.LENGTH_SHORT).show()
-                    finish()
-                }
-                .addOnFailureListener {
-                    Toast.makeText(this, "Update Failed: ${it.message}", Toast.LENGTH_SHORT).show()
-                }
+            dbRef.updateChildren(updates).addOnSuccessListener {
+                Toast.makeText(this, "Driver Updated Successfully!", Toast.LENGTH_SHORT).show()
+                finish()
+            }
         }
     }
 
@@ -102,13 +89,15 @@ class AddDriverActivity : AppCompatActivity() {
                     val randomId = Random.Default.nextInt(1000, 9999)
                     val driverCustomId = "DRV-$randomId"
 
+                    // UPDATED: isAvailable flag add kar diya taake Driver list mein show ho
                     val driverData = mapOf(
                         "uid" to uid,
                         "name" to name,
                         "email" to email,
                         "phone" to phone,
                         "driverId" to driverCustomId,
-                        "role" to "driver"
+                        "role" to "driver",
+                        "isAvailable" to true // <--- YE ZAROORI HAI
                     )
 
                     FirebaseDatabase.getInstance().getReference("users")
@@ -117,16 +106,11 @@ class AddDriverActivity : AppCompatActivity() {
                         .addOnSuccessListener {
                             showSuccessDialog(driverCustomId)
                         }
-                        .addOnFailureListener {
-                            Toast.makeText(this, "Database Error: ${it.message}", Toast.LENGTH_SHORT).show()
-                        }
-
                 } else {
                     Toast.makeText(this, "Auth Error: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                 }
             }
     }
-
 
     private fun showSuccessDialog(driverId: String) {
         val builder = AlertDialog.Builder(this)

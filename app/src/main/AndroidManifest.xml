@@ -70,7 +70,7 @@
             android:exported="false"
             android:label="Parent Dashboard" />
         <activity
-            android:name=".Admin_Dashboard.DriverDashboard"
+            android:name=".Driver_Dashboard.DriverDashboard"
             android:exported="false"
             android:label="Driver Dashboard" />
         <activity

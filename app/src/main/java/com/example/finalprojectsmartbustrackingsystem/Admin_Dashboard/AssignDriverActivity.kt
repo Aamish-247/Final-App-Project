@@ -16,7 +16,7 @@ class AssignDriverActivity : AppCompatActivity() {
     private lateinit var spinnerDriver: AutoCompleteTextView
     private lateinit var spinnerBus: AutoCompleteTextView
 
-    private val driverMap = HashMap<String, String>() // Driver Name -> Driver ID (UID)
+    private val driverMap = HashMap<String, String>() // Driver Name -> Driver ID
     private val busMap = HashMap<String, String>() // Bus Name -> Bus ID
 
     private var selectedDriverId: String? = null
@@ -33,23 +33,19 @@ class AssignDriverActivity : AppCompatActivity() {
         spinnerDriver = findViewById(R.id.spinner_select_driver)
         spinnerBus = findViewById(R.id.spinner_select_bus_for_driver)
 
-        // Data Load Karo
         loadDrivers()
-        loadBuses()
+        loadBuses() // Naya Logic yahan apply hoga
 
-        // Driver Selection Listener
         spinnerDriver.setOnItemClickListener { _, _, position, _ ->
             selectedDriverName = spinnerDriver.adapter.getItem(position).toString()
             selectedDriverId = driverMap[selectedDriverName]
         }
 
-        // Bus Selection Listener
         spinnerBus.setOnItemClickListener { _, _, position, _ ->
             selectedBusName = spinnerBus.adapter.getItem(position).toString()
             selectedBusId = busMap[selectedBusName]
         }
 
-        // Save Button Logic
         findViewById<MaterialButton>(R.id.btn_save_driver_assignment).setOnClickListener {
             if (selectedDriverId != null && selectedBusId != null) {
                 saveAssignmentToDatabase()
@@ -59,26 +55,52 @@ class AssignDriverActivity : AppCompatActivity() {
         }
     }
 
-    // UPDATED: Fetch Drivers from 'users' node where role is 'driver'
     private fun loadDrivers() {
-        dbRef.child("users").orderByChild("role").equalTo("driver")
+        // Query: users jahan role 'driver' ho AUR isAvailable true ho
+        dbRef.child("users").orderByChild("isAvailable").equalTo(true)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val driverNames = ArrayList<String>()
-                    driverMap.clear() // Purana data clear karein
+                    driverMap.clear()
 
                     if (snapshot.exists()) {
                         for (snap in snapshot.children) {
                             val name = snap.child("name").value.toString()
-                            val id = snap.key.toString() // Yeh UID uthayega
-
+                            val id = snap.key.toString()
                             driverNames.add(name)
                             driverMap[name] = id
                         }
                         val adapter = ArrayAdapter(this@AssignDriverActivity, android.R.layout.simple_dropdown_item_1line, driverNames)
                         spinnerDriver.setAdapter(adapter)
                     } else {
-                        Toast.makeText(this@AssignDriverActivity, "No drivers found in database", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@AssignDriverActivity, "No available drivers!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                override fun onCancelled(error: DatabaseError) {}
+            })
+    }
+
+    // NEW LOGIC: Sirf wahi buses load hongi jo 'isAssigned' false hain
+    private fun loadBuses() {
+        // Query: buses node mein jahan isAssigned == false ho
+        dbRef.child("buses").orderByChild("isAssigned").equalTo(false)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val busNames = ArrayList<String>()
+                    busMap.clear()
+
+                    if (snapshot.exists()) {
+                        for (snap in snapshot.children) {
+                            val name = snap.child("busName").value.toString()
+                            val id = snap.key.toString()
+
+                            busNames.add(name)
+                            busMap[name] = id
+                        }
+                        val adapter = ArrayAdapter(this@AssignDriverActivity, android.R.layout.simple_dropdown_item_1line, busNames)
+                        spinnerBus.setAdapter(adapter)
+                    } else {
+                        Toast.makeText(this@AssignDriverActivity, "No available buses found!", Toast.LENGTH_SHORT).show()
                     }
                 }
 
@@ -88,51 +110,23 @@ class AssignDriverActivity : AppCompatActivity() {
             })
     }
 
-    // Fetch Buses
-    private fun loadBuses() {
-        dbRef.child("buses").addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val busNames = ArrayList<String>()
-                busMap.clear()
-
-                if (snapshot.exists()) {
-                    for (snap in snapshot.children) {
-                        val name = snap.child("busName").value.toString()
-                        val id = snap.key.toString()
-
-                        busNames.add(name)
-                        busMap[name] = id
-                    }
-                    val adapter = ArrayAdapter(this@AssignDriverActivity, android.R.layout.simple_dropdown_item_1line, busNames)
-                    spinnerBus.setAdapter(adapter)
-                } else {
-                    Toast.makeText(this@AssignDriverActivity, "No buses found", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {}
-        })
-    }
-
-    // UPDATED: Save data properly to both nodes using multipath updates
+    // 2. UPDATED: Save karte waqt dono ko lock karo
     private fun saveAssignmentToDatabase() {
         val updates = HashMap<String, Any>()
 
-        // 1. Driver ki profile (users node) mein bus ka data save karna
+        // Driver update
         updates["users/${selectedDriverId}/assignedBusId"] = selectedBusId!!
         updates["users/${selectedDriverId}/assignedBusName"] = selectedBusName!!
+        updates["users/${selectedDriverId}/isAvailable"] = false // DRIVER LOCK!
 
-        // 2. Bus ke node mein driver ka data save karna
+        // Bus update
         updates["buses/${selectedBusId}/assignedDriverId"] = selectedDriverId!!
         updates["buses/${selectedBusId}/assignedDriverName"] = selectedDriverName!!
+        updates["buses/${selectedBusId}/isAssigned"] = true // BUS LOCK!
 
-        dbRef.updateChildren(updates)
-            .addOnSuccessListener {
-                Toast.makeText(this, "Driver Assigned Successfully!", Toast.LENGTH_LONG).show()
-                finish() // Screen close ho jayegi
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "Error: ${it.message}", Toast.LENGTH_SHORT).show()
-            }
+        dbRef.updateChildren(updates).addOnSuccessListener {
+            Toast.makeText(this, "Assignment Successful! Driver and Bus are Busy Now.", Toast.LENGTH_LONG).show()
+            finish()
+        }
     }
 }

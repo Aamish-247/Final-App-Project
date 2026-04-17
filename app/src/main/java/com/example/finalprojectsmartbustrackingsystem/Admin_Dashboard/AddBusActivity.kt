@@ -30,12 +30,10 @@ class AddBusActivity : AppCompatActivity() {
             isEditMode = true
             editBusId = intent.getStringExtra("busId")
 
-            // Form ko purane data se bhar dena
             etBusName.setText(intent.getStringExtra("busName"))
             etBusPlate.setText(intent.getStringExtra("licensePlate"))
             etBusCapacity.setText(intent.getStringExtra("capacity"))
 
-            // Button ka text change karna
             btnSave.text = "UPDATE BUS"
         }
 
@@ -63,13 +61,15 @@ class AddBusActivity : AppCompatActivity() {
 
         val dbRef = FirebaseDatabase.getInstance().getReference("buses")
 
+        // UPDATE: isAssigned ko false set kiya hai taake ye list mein show ho
         val busData = mapOf(
             "busId" to busId,
             "busName" to name,
             "licensePlate" to plate,
             "capacity" to capacity,
             "assignedRoute" to "Not Assigned",
-            "assignedDriver" to "Not Assigned"
+            "assignedDriver" to "Not Assigned",
+            "isAssigned" to false // <--- YE ZAROORI HAI
         )
 
         dbRef.child(busId).setValue(busData)
@@ -85,7 +85,6 @@ class AddBusActivity : AppCompatActivity() {
         editBusId?.let { id ->
             val dbRef = FirebaseDatabase.getInstance().getReference("buses").child(id)
 
-            // Sirf wahi cheezein update karein jo form mein hain
             val updates = mapOf(
                 "busName" to name,
                 "licensePlate" to plate,
