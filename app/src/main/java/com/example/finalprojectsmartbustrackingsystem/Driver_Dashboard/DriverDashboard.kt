@@ -41,7 +41,9 @@ class DriverDashboard : AppCompatActivity() {
 
         btnStartTrip.setOnClickListener {
             if (currentBusId != null) {
-                Toast.makeText(this, "Trip Started!", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this, ActiveTripActivity::class.java)
+                intent.putExtra("BUS_ID", currentBusId)
+                startActivity(intent)
                 // Yahan ActiveTripActivity ka intent aayega
             } else {
                 Toast.makeText(this, "No Bus Assigned!", Toast.LENGTH_SHORT).show()
@@ -55,29 +57,27 @@ class DriverDashboard : AppCompatActivity() {
 
     private fun fetchDriverDetails() {
         val uid = auth.currentUser?.uid ?: return
-
-        dbRef.child(uid).addListenerForSingleValueEvent(object : ValueEventListener {
+        dbRef.child(uid).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
-                    // Driver ka naam fetch karna
-                    val name = snapshot.child("name").value?.toString() ?: "Driver"
-                    val busName = snapshot.child("assignedBusName").value?.toString() ?: "No Bus"
-                    currentBusId = snapshot.child("assignedBusId").value?.toString()
+                    val busId = snapshot.child("assignedBusId").value?.toString()
 
-                    // Shift timing fetch karna
-                    val sTime = snapshot.child("shiftStart").value?.toString() ?: "--"
-                    val eTime = snapshot.child("shiftEnd").value?.toString() ?: "--"
-
-                    // UI Update
-                    tvWelcome.text = "Welcome, $name!"
-                    tvAssignedBus.text = busName
-                    tvShiftTiming.text = "Shift: $sTime to $eTime"
+                    if (busId == null || busId == "null" || busId == "Not Assigned") {
+                        // Agar trip end ho chuki hai to UI khali kar do
+                        currentBusId = null
+                        tvAssignedBus.text = "No Bus Assigned"
+                        tvShiftTiming.text = "Shift: --:-- to --:--"
+                    } else {
+                        // Agar bus assign hai to data dikhao
+                        currentBusId = busId
+                        tvAssignedBus.text = snapshot.child("assignedBusName").value?.toString() ?: "Unknown"
+                        val sTime = snapshot.child("shiftStart").value?.toString() ?: "--"
+                        val eTime = snapshot.child("shiftEnd").value?.toString() ?: "--"
+                        tvShiftTiming.text = "Shift: $sTime to $eTime"
+                    }
                 }
             }
-
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@DriverDashboard, "Database Error!", Toast.LENGTH_SHORT).show()
-            }
+            override fun onCancelled(error: DatabaseError) {}
         })
     }
 }

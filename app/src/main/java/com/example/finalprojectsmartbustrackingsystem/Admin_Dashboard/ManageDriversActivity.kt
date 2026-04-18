@@ -71,16 +71,53 @@ class ManageDriversActivity : AppCompatActivity() {
                 }
 
                 // --- 2. DELETE LOGIC ---
+                // ManageDriversActivity.kt mein delete logic ko update karein
                 holder.btnDelete.setOnClickListener {
                     val builder = AlertDialog.Builder(this@ManageDriversActivity)
                     builder.setTitle("Delete Driver")
-                    builder.setMessage("Do you want to delete ${current.name} from the list?")
+                    builder.setMessage("Do you want to delete this driver?")
+
                     builder.setPositiveButton("Yes, Delete") { dialog, _ ->
-                        current.uid?.let { uid ->
-                            dbRef.child(uid).removeValue()
-                                .addOnSuccessListener {
-                                    Toast.makeText(this@ManageDriversActivity, "Driver Deleted Successfully", Toast.LENGTH_SHORT).show()
-                                }
+                        val driverUid = current.uid
+                        val busId = current.assignedBusId
+
+                        if (driverUid != null) {
+                            val rootRef = FirebaseDatabase.getInstance().reference
+                            val updates = HashMap<String, Any?>()
+
+                            // 1. Driver ko users list se nikalna
+                            updates["users/$driverUid"] = null
+
+                            // 2. Agar koi bus assign thi, to usay free karna
+                            if (!busId.isNullOrEmpty() && busId != "Not Assigned") {
+                                updates["buses/$busId/isAssigned"] = false
+                                updates["buses/$busId/assignedDriverId"] = "Not Assigned"
+                                updates["buses/$busId/assignedDriverName"] = "Not Assigned"
+                            }
+
+                            // 3. Students ka data update karne ke liye query
+                            rootRef.child("students").orderByChild("driverId").equalTo(driverUid)
+                                .addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        for (studentSnap in snapshot.children) {
+                                            val studentId = studentSnap.key
+                                            if (studentId != null) {
+                                                // Student ke record se driver info hatana
+                                                updates["students/$studentId/driverId"] = "Not Assigned"
+                                                updates["students/$studentId/driverName"] = "Not Assigned"
+                                            }
+                                        }
+
+                                        // Atomic Update: Sab kaam aik sath database mein honge
+                                        rootRef.updateChildren(updates).addOnSuccessListener {
+                                            Toast.makeText(this@ManageDriversActivity, "Driver and linked data removed successfully", Toast.LENGTH_SHORT).show()
+                                        }.addOnFailureListener {
+                                            Toast.makeText(this@ManageDriversActivity, "Error: ${it.message}", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {}
+                                })
                         }
                         dialog.dismiss()
                     }

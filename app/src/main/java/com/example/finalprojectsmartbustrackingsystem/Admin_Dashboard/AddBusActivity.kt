@@ -56,20 +56,21 @@ class AddBusActivity : AppCompatActivity() {
     }
 
     private fun saveBusToDatabase(name: String, plate: String, capacity: String) {
-        val randomId = Random.nextInt(1000, 9999)
+        val randomId = kotlin.random.Random.nextInt(1000, 9999)
         val busId = "BUS-$randomId"
 
-        val dbRef = FirebaseDatabase.getInstance().getReference("buses")
+        val dbRef = com.google.firebase.database.FirebaseDatabase.getInstance().getReference("buses")
 
-        // UPDATE: isAssigned ko false set kiya hai taake ye list mein show ho
+        // MAP ko update kiya gaya hai (purani extra key nikal di hai)
         val busData = mapOf(
             "busId" to busId,
             "busName" to name,
             "licensePlate" to plate,
             "capacity" to capacity,
             "assignedRoute" to "Not Assigned",
-            "assignedDriver" to "Not Assigned",
-            "isAssigned" to false // <--- YE ZAROORI HAI
+            "assignedDriverId" to "Not Assigned",   // <-- NAYI KEY
+            "assignedDriverName" to "Not Assigned", // <-- NAYI KEY
+            "isAssigned" to false
         )
 
         dbRef.child(busId).setValue(busData)

@@ -79,7 +79,15 @@ class DefineRouteActivity : AppCompatActivity() {
                 builder.setMessage("Do you wanna delete this route?")
 
                 builder.setPositiveButton("Yes, Delete") { dialog, _ ->
-                    dbRef.child("routes").child(selectedBusId!!).removeValue()
+                    val updates = HashMap<String, Any?>()
+
+                    // 1. 'routes' node se is bus ka data delete karna (null pass karke)
+                    updates["routes/${selectedBusId!!}"] = null
+
+                    // 2. 'buses' node mein wapis "Not Assigned" set karna
+                    updates["buses/${selectedBusId!!}/assignedRoute"] = "Not Assigned"
+
+                    dbRef.updateChildren(updates)
                         .addOnSuccessListener {
                             clearMapData()
                             tvInstruction.text = "Route deleted. Tap on map to create a new one!"
@@ -225,6 +233,7 @@ class DefineRouteActivity : AppCompatActivity() {
     }
 
     private fun saveRouteToFirebase() {
+        val updates = HashMap<String, Any?>() // Any? isliye use kiya taake aage delete mein null de sakein
         val routeData = HashMap<String, Any>()
 
         for ((index, point) in routePoints.withIndex()) {
@@ -235,7 +244,14 @@ class DefineRouteActivity : AppCompatActivity() {
             routeData["stop_${index + 1}"] = stopData
         }
 
-        dbRef.child("routes").child(selectedBusId!!).setValue(routeData)
+        // 1. Route ka data 'routes' node mein save karna
+        updates["routes/${selectedBusId!!}"] = routeData
+
+        // 2. Bus ke node mein assignedRoute ko update karna
+        updates["buses/${selectedBusId!!}/assignedRoute"] = "Assigned"
+
+        // updateChildren se dono nodes ek sath update honge
+        dbRef.updateChildren(updates)
             .addOnSuccessListener {
                 Toast.makeText(this, "Route saved successfully for this Bus!", Toast.LENGTH_LONG).show()
                 finish()

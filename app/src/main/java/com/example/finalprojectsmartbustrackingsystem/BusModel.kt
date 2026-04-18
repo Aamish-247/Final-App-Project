@@ -5,6 +5,8 @@ data class BusModel(
     val busName: String? = "",
     val licensePlate: String? = "",
     val capacity: String? = "",
-    val assignedRoute: String? = "",
-    val assignedDriver: String? = ""
+    val assignedRoute: String? = "Not Assigned",
+    val assignedDriverId: String? = "Not Assigned",
+    val assignedDriverName: String? = "Not Assigned",
+    val isAssigned: Boolean = false
 )

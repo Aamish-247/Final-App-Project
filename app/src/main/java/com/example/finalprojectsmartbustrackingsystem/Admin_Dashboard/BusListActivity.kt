@@ -65,25 +65,59 @@ class BusListActivity : AppCompatActivity() {
                 holder.capacity.text = "Seats: ${current.capacity}"
 
                 // --- DELETE LOGIC ---
+                // BusListActivity.kt mein delete button ki logic ko update karein
                 holder.btnDelete.setOnClickListener {
                     val builder = AlertDialog.Builder(this@BusListActivity)
                     builder.setTitle("Delete Bus")
-                    builder.setMessage("Do you want to delete ${current.busName} from the list?")
+                    builder.setMessage("Do you want to delete this bus?")
+
                     builder.setPositiveButton("Yes, Delete") { dialog, _ ->
-                        current.busId?.let { id ->
-                            dbRef.child(id).removeValue()
-                                .addOnSuccessListener {
-                                    Toast.makeText(this@BusListActivity, "Bus Deleted Successfully", Toast.LENGTH_SHORT).show()
-                                }
-                                .addOnFailureListener {
-                                    Toast.makeText(this@BusListActivity, "Error: ${it.message}", Toast.LENGTH_SHORT).show()
-                                }
+                        val busId = current.busId
+                        val driverUid = current.assignedDriverId// Yeh BusModel mein hona chahiye
+
+                        if (busId != null) {
+                            val rootRef = FirebaseDatabase.getInstance().reference
+                            val updates = HashMap<String, Any?>()
+
+                            // 1. Bus ko database se delete karna
+                            updates["buses/$busId"] = null
+
+                            // 2. Driver ko free karna (Agar koi driver assign tha)
+                            if (!driverUid.isNullOrEmpty() && driverUid != "Not Assigned") {
+                                updates["users/$driverUid/isAvailable"] = true
+                                updates["users/$driverUid/assignedBusId"] = null
+                                updates["users/$driverUid/assignedBusName"] = "Not Assigned"
+                            }
+
+                            // 3. Students ka data update karna jo is bus mein thay
+                            rootRef.child("students").orderByChild("busId").equalTo(busId)
+                                .addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        for (studentSnap in snapshot.children) {
+                                            val studentId = studentSnap.key
+                                            if (studentId != null) {
+                                                // Student ke record se bus aur driver dono ki info hatana
+                                                updates["students/$studentId/busId"] = "Not Assigned"
+                                                updates["students/$studentId/busName"] = "Not Assigned"
+                                                updates["students/$studentId/driverId"] = "Not Assigned"
+                                                updates["students/$studentId/driverName"] = "Not Assigned"
+                                            }
+                                        }
+
+                                        // Atomic Update: Saara cleaning process aik hi dafa mein
+                                        rootRef.updateChildren(updates).addOnSuccessListener {
+                                            Toast.makeText(this@BusListActivity, "Bus and linked records updated successfully", Toast.LENGTH_SHORT).show()
+                                        }.addOnFailureListener {
+                                            Toast.makeText(this@BusListActivity, "Error: ${it.message}", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {}
+                                })
                         }
                         dialog.dismiss()
                     }
-                    builder.setNegativeButton("Cancel") { dialog, _ ->
-                        dialog.dismiss()
-                    }
+                    builder.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
                     builder.show()
                 }
 

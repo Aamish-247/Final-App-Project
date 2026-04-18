@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <org.osmdroid.views.MapView
+        android:id="@+id/mapview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_margin="16dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="6dp">
+
+        <TextView
+            android:id="@+id/tv_trip_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:text="Live Tracking: Active"
+            android:gravity="center"
+            android:textColor="#4CAF50"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btn_recenter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/bottom_action_bar"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:src="@android:drawable/ic_menu_mylocation"
+        app:backgroundTint="@color/white"
+        app:tint="#1976D2"
+        android:contentDescription="Recenter Map" />
+
+    <LinearLayout
+        android:id="@+id/bottom_action_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="#DDFFFFFF"
+        android:elevation="10dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_active_attendance"
+            android:layout_width="0dp"
+            android:layout_height="65dp"
+            android:layout_weight="1"
+            android:text="ATTENDANCE"
+            android:textStyle="bold"
+            android:layout_marginEnd="8dp"
+            app:cornerRadius="12dp"
+            app:backgroundTint="#1976D2" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_end_trip"
+            android:layout_width="0dp"
+            android:layout_height="65dp"
+            android:layout_weight="1"
+            android:text="END TRIP"
+            android:textStyle="bold"
+            android:layout_marginStart="8dp"
+            app:cornerRadius="12dp"
+            app:backgroundTint="#D32F2F" />
+    </LinearLayout>
+
+</RelativeLayout>
