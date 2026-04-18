@@ -8,5 +8,7 @@ data class BusModel(
     val assignedRoute: String? = "Not Assigned",
     val assignedDriverId: String? = "Not Assigned",
     val assignedDriverName: String? = "Not Assigned",
-    val isAssigned: Boolean = false
+    val isAssigned: Boolean = false,
+    val lastLat: Double? = null,
+    val lastLng: Double? = null
 )

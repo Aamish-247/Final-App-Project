@@ -182,31 +182,32 @@ class ActiveTripActivity : AppCompatActivity() {
     }
 
     private fun releaseResources() {
-        // GPS updates band karna
         fusedLocationClient.removeLocationUpdates(locationCallback)
 
         val updates = HashMap<String, Any?>()
 
-        // 1. Bus ko unassign karna
+        // Bus aur Driver ko free karna
         updates["buses/$busId/isAssigned"] = false
         updates["buses/$busId/assignedDriverId"] = "Not Assigned"
         updates["buses/$busId/assignedDriverName"] = "Not Assigned"
 
-        // 2. Driver ki profile reset karna (Bus info aur Shift timings)
         updates["users/$driverUid/isAvailable"] = true
         updates["users/$driverUid/assignedBusId"] = null
         updates["users/$driverUid/assignedBusName"] = "Not Assigned"
         updates["users/$driverUid/shiftStart"] = "--:--"
         updates["users/$driverUid/shiftEnd"] = "--:--"
 
+        if (currentDriverPoint != null) {
+            updates["buses/$busId/lastLat"] = currentDriverPoint!!.latitude
+            updates["buses/$busId/lastLng"] = currentDriverPoint!!.longitude
+        }
+
+        // Live location ko remove karna
         dbRef.child("live_locations").child(busId!!).removeValue()
 
-        // Atomic Update execute karna
         dbRef.updateChildren(updates).addOnSuccessListener {
-            Toast.makeText(this, "Trip Completed! All records updated.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Trip Completed!", Toast.LENGTH_SHORT).show()
             finish()
-        }.addOnFailureListener {
-            Toast.makeText(this, "Error: ${it.message}", Toast.LENGTH_SHORT).show()
         }
     }
 

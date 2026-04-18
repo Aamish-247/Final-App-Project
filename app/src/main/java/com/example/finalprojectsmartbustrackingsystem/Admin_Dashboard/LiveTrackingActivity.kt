@@ -11,7 +11,6 @@ import android.graphics.Typeface
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -27,9 +26,12 @@ import kotlin.math.max
 class LiveTrackingActivity : AppCompatActivity() {
 
     private lateinit var map: MapView
-    private lateinit var tvActiveBuses: TextView
     private lateinit var btnRefresh: MaterialCardView
-    private lateinit var dbRef: DatabaseReference
+
+    // Database references alag alag kar diye hain safai ke liye
+    private lateinit var dbRefBuses: DatabaseReference
+    private lateinit var dbRefLive: DatabaseReference
+    private lateinit var dbRefRoutes: DatabaseReference
 
     // HashMap to keep track of existing markers (BusID -> Marker)
     private val busMarkers = HashMap<String, Marker>()
@@ -45,12 +47,19 @@ class LiveTrackingActivity : AppCompatActivity() {
         setContentView(R.layout.activity_live_tracking)
 
         map = findViewById(R.id.map_live_tracking)
-        tvActiveBuses = findViewById(R.id.tv_active_buses)
         btnRefresh = findViewById(R.id.btn_refresh_map)
 
-        dbRef = FirebaseDatabase.getInstance().getReference("live_locations")
+        // Firebase References Initialize karna
+        dbRefBuses = FirebaseDatabase.getInstance().getReference("buses")
+        dbRefLive = FirebaseDatabase.getInstance().getReference("live_locations")
+        dbRefRoutes = FirebaseDatabase.getInstance().getReference("routes")
 
         setupMap()
+
+        // LOGIC 1: Map load hote hi sab buses ko Last Location ya Stop 1 par lagana
+        loadInitialBusPositions()
+
+        // LOGIC 2: Live updates sunna
         startListeningToLiveLocations()
 
         btnRefresh.setOnClickListener {
@@ -71,80 +80,101 @@ class LiveTrackingActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         // Listener remove karna zaroori hai warna background mein crash hoga
-        liveLocationListener?.let { dbRef.removeEventListener(it) }
+        liveLocationListener?.let { dbRefLive.removeEventListener(it) }
     }
 
     private fun setupMap() {
         map.setMultiTouchControls(true)
         val mapController = map.controller
-        mapController.setZoom(15.0)
+        mapController.setZoom(14.0)
 
         val defaultPoint = GeoPoint(33.6844, 73.0479)
         mapController.setCenter(defaultPoint)
     }
 
-    // LOGIC 1: Automatic Live Update (Realtime)
+    // --- PHASE 1: Khari hui (Idle / Parked) Buses Load Karna ---
+    private fun loadInitialBusPositions() {
+        dbRefBuses.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (busSnap in snapshot.children) {
+                    val busId = busSnap.key.toString()
+                    val routeStatus = busSnap.child("assignedRoute").value?.toString()
+
+                    if (routeStatus == "Assigned") {
+                        val lastLat = busSnap.child("lastLat").value?.toString()?.toDoubleOrNull()
+                        val lastLng = busSnap.child("lastLng").value?.toString()?.toDoubleOrNull()
+
+                        if (lastLat != null && lastLng != null) {
+                            // Bus ki aakhri parked location database mein majood hai
+                            updateOrAddMarker(busId, GeoPoint(lastLat, lastLng))
+                        } else {
+                            // Agar nayi bus hai jisne aaj tak trip nahi kiya, toh Stop 1 par laga do
+                            fetchStop1AndPlaceMarker(busId)
+                        }
+                    }
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
+
+    private fun fetchStop1AndPlaceMarker(busId: String) {
+        dbRefRoutes.child(busId).child("stop_1")
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        val lat = snapshot.child("latitude").value.toString().toDouble()
+                        val lng = snapshot.child("longitude").value.toString().toDouble()
+                        val stop1Point = GeoPoint(lat, lng)
+
+                        // Marker lagao agar live tracking se pehle aayi nahi
+                        if (!busMarkers.containsKey(busId)) {
+                            updateOrAddMarker(busId, stop1Point)
+                        }
+                    }
+                }
+                override fun onCancelled(error: DatabaseError) {}
+            })
+    }
+
+    // --- PHASE 2: Automatic Live Update (Realtime) ---
     private fun startListeningToLiveLocations() {
         liveLocationListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (!isFinishing && !isDestroyed) {
-                    processLocationData(snapshot, isManual = false)
+                    if (snapshot.exists()) {
+                        for (busSnap in snapshot.children) {
+                            val busId = busSnap.key.toString()
+                            val latStr = busSnap.child("latitude").value?.toString()
+                            val lngStr = busSnap.child("longitude").value?.toString()
+
+                            if (latStr != null && lngStr != null) {
+                                try {
+                                    val geoPoint = GeoPoint(latStr.toDouble(), lngStr.toDouble())
+                                    updateOrAddMarker(busId, geoPoint)
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            }
+                        }
+                    }
                 }
             }
             override fun onCancelled(error: DatabaseError) {
                 Toast.makeText(this@LiveTrackingActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
             }
         }
-        liveLocationListener?.let { dbRef.addValueEventListener(it) }
+        liveLocationListener?.let { dbRefLive.addValueEventListener(it) }
     }
 
-    // LOGIC 2: Manual Refresh Update (One-time fetch)
     private fun manualRefreshLocations() {
         Toast.makeText(this, "Refreshing Map...", Toast.LENGTH_SHORT).show()
-
-        // get() use kiya hai taake sirf ek dafa data aaye
-        dbRef.get().addOnSuccessListener { snapshot ->
-            processLocationData(snapshot, isManual = true)
-        }.addOnFailureListener {
-            Toast.makeText(this, "Failed to refresh", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    // Helper Function: Data process karne ke liye (Taa ke code repeat na ho)
-    private fun processLocationData(snapshot: DataSnapshot, isManual: Boolean) {
-        if (snapshot.exists()) {
-            var activeCount = 0
-
-            for (busSnap in snapshot.children) {
-                val busId = busSnap.key.toString()
-                val latStr = busSnap.child("latitude").value?.toString()
-                val lngStr = busSnap.child("longitude").value?.toString()
-
-                if (latStr != null && lngStr != null) {
-                    try {
-                        val lat = latStr.toDouble()
-                        val lng = lngStr.toDouble()
-                        val geoPoint = GeoPoint(lat, lng)
-
-                        updateOrAddMarker(busId, geoPoint)
-                        activeCount++
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-            }
-            tvActiveBuses.text = "Active Buses on Map: $activeCount"
-
-            if (isManual) {
-                Toast.makeText(this, "Map Updated!", Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            tvActiveBuses.text = "Active Buses on Map: 0"
-        }
+        // Refresh par dono dobara load karwa lein taake map bilkul sync ho jaye
+        loadInitialBusPositions()
+        map.invalidate()
     }
 
     private fun updateOrAddMarker(busId: String, newPosition: GeoPoint) {
-        // ASAL FIX: runOnUiThread lazmi hai taake screen hang ya block na ho
         runOnUiThread {
             if (busMarkers.containsKey(busId)) {
                 val existingMarker = busMarkers[busId]
@@ -192,8 +222,12 @@ class LiveTrackingActivity : AppCompatActivity() {
         val textWidth = textBounds.width() + 40
         val textHeight = textBounds.height() + 20
 
-        val busIcon = ContextCompat.getDrawable(context, R.drawable.ic_bus_marker) ?:
-        ContextCompat.getDrawable(context, org.osmdroid.library.R.drawable.marker_default)!!
+        val busIcon = ContextCompat.getDrawable(context, R.drawable.ic_bus_marker)?.mutate() ?:
+        ContextCompat.getDrawable(context, org.osmdroid.library.R.drawable.marker_default)!!.mutate()
+
+        // Sab buses ke liye ek uniform color taake map clean lagay
+        busIcon.setTint(Color.parseColor("#1976D2"))
+
         val iconWidth = busIcon.intrinsicWidth
         val iconHeight = busIcon.intrinsicHeight
 
