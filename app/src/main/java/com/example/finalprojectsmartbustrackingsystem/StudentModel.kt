@@ -10,5 +10,6 @@ data class StudentModel(
     val driverId: String? = "",
     val driverName: String? = "",
     val pickupStop: String? = null,
-    val dropoffStop: String? = null
+    val dropoffStop: String? = null,
+    var attendanceStatus: String? = "Pending"
 )
