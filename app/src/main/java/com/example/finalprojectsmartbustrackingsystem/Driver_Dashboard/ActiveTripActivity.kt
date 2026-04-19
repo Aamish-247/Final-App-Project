@@ -215,6 +215,7 @@ class ActiveTripActivity : AppCompatActivity() {
         updates["users/$driverUid/assignedBusName"] = "Not Assigned"
         updates["users/$driverUid/shiftStart"] = "--:--"
         updates["users/$driverUid/shiftEnd"] = "--:--"
+        updates["users/$driverUid/isTripActive"] = false
 
         if (currentDriverPoint != null) {
             updates["buses/$busId/lastLat"] = currentDriverPoint!!.latitude
