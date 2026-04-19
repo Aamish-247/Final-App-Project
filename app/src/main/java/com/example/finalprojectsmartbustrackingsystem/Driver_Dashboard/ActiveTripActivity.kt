@@ -1,6 +1,7 @@
 package com.example.finalprojectsmartbustrackingsystem.Driver_Dashboard
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Looper
@@ -69,6 +70,18 @@ class ActiveTripActivity : AppCompatActivity() {
         findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_end_trip).setOnClickListener {
             showEndConfirmation()
         }
+
+        val btnAttendance = findViewById<View>(R.id.btn_active_attendance)
+        btnAttendance.setOnClickListener {
+            if (busId != null) {
+                // Agar bus ID mojood hai toh Attendance Activity kholo
+                val intent = Intent(this, DriverAttendanceActivity::class.java)
+                intent.putExtra("BUS_ID", busId)
+                startActivity(intent)
+            } else {
+                Toast.makeText(this, "Wait for GPS or Route to load...", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun setupMap() {
@@ -107,17 +120,23 @@ class ActiveTripActivity : AppCompatActivity() {
                                 0 -> {
                                     // START POINT: Green Marker
                                     marker.title = "Start (Stop 1)"
-                                    marker.icon = ContextCompat.getDrawable(this@ActiveTripActivity, org.osmdroid.library.R.drawable.marker_default)
-                                    marker.icon.setTint(Color.GREEN)
-                                    routeStartPoint = points[i] // Recenter ke liye save kiya
+                                    val startIcon = ContextCompat.getDrawable(this@ActiveTripActivity, R.drawable.ic_custom_pin)?.mutate()
+                                    startIcon?.setTint(Color.GREEN)
+
+                                    routeStartPoint = points[i]
                                 }
                                 points.size - 1 -> {
+                                    // END POINT: Red Marker
                                     marker.title = "Last Stop"
-                                    marker.icon = ContextCompat.getDrawable(this@ActiveTripActivity, org.osmdroid.library.R.drawable.marker_default)
-                                    marker.icon.setTint(Color.RED)
+                                    val endIcon = ContextCompat.getDrawable(this@ActiveTripActivity, R.drawable.ic_custom_pin)?.mutate()
+                                    endIcon?.setTint(Color.RED)
+                                    marker.icon = endIcon
                                 }
                                 else -> {
                                     marker.title = "Stop ${i + 1}"
+                                    val middleIcon = ContextCompat.getDrawable(this@ActiveTripActivity, R.drawable.ic_custom_pin)?.mutate()
+                                    middleIcon?.setTint(Color.BLUE)
+                                    marker.icon = middleIcon
                                 }
                             }
                             map.overlays.add(marker)
@@ -127,7 +146,7 @@ class ActiveTripActivity : AppCompatActivity() {
                             map.controller.animateTo(it)
                         }
                     }
-                    map.invalidate() // UI Refresh
+                    map.invalidate()
                 }
             }
             override fun onCancelled(error: DatabaseError) {}
