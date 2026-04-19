@@ -105,9 +105,10 @@ class LiveTrackingActivity : AppCompatActivity() {
                         val lastLng = busSnap.child("lastLng").value?.toString()?.toDoubleOrNull()
 
                         if (lastLat != null && lastLng != null) {
-                            // Bus ki aakhri parked location database mein majood hai
+
                             updateOrAddMarker(busId, GeoPoint(lastLat, lastLng))
-                        } else {
+                        }
+                        else {
                             // Agar nayi bus hai jisne aaj tak trip nahi kiya, toh Stop 1 par laga do
                             fetchStop1AndPlaceMarker(busId)
                         }
@@ -169,7 +170,6 @@ class LiveTrackingActivity : AppCompatActivity() {
 
     private fun manualRefreshLocations() {
         Toast.makeText(this, "Refreshing Map...", Toast.LENGTH_SHORT).show()
-        // Refresh par dono dobara load karwa lein taake map bilkul sync ho jaye
         loadInitialBusPositions()
         map.invalidate()
     }
@@ -222,11 +222,7 @@ class LiveTrackingActivity : AppCompatActivity() {
         val textWidth = textBounds.width() + 40
         val textHeight = textBounds.height() + 20
 
-        val busIcon = ContextCompat.getDrawable(context, R.drawable.ic_bus_marker)?.mutate() ?:
-        ContextCompat.getDrawable(context, org.osmdroid.library.R.drawable.marker_default)!!.mutate()
-
-        // Sab buses ke liye ek uniform color taake map clean lagay
-        busIcon.setTint(Color.parseColor("#1976D2"))
+        val busIcon = ContextCompat.getDrawable(context, R.drawable.ic_bus_marker)!!.mutate()
 
         val iconWidth = busIcon.intrinsicWidth
         val iconHeight = busIcon.intrinsicHeight
