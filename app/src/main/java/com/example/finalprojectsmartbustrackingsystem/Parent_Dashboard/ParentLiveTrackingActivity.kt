@@ -1,11 +1,13 @@
 package com.example.finalprojectsmartbustrackingsystem.Parent_Dashboard
 
+import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.example.finalprojectsmartbustrackingsystem.R
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.*
@@ -30,7 +32,7 @@ class ParentLiveTrackingActivity : AppCompatActivity() {
 
     private var busMarker: Marker? = null
     private var currentBusLocation: GeoPoint? = null
-    private var studentStopLocation: GeoPoint? = null // Default shuru mein Null hoga
+    private var studentStopLocation: GeoPoint? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,16 +56,14 @@ class ParentLiveTrackingActivity : AppCompatActivity() {
 
         tvLiveBusName.text = "Tracking Bus: $busId"
 
-        // 🔥 FIX: Sirf map setup karo, Marker abhi nahi lagana kyunke location nahi aayi
         setupMap()
 
         if (busId.isNotEmpty()) {
-            fetchStopOneLocation(busId)
+            fetchRouteStopsAndStart(busId)
         } else {
             Toast.makeText(this, "Bus ID Error!", Toast.LENGTH_SHORT).show()
         }
 
-        // Floating Recenter Button Logic
         fabRecenter.setOnClickListener {
             currentBusLocation?.let {
                 map.controller.animateTo(it)
@@ -75,45 +75,60 @@ class ParentLiveTrackingActivity : AppCompatActivity() {
     private fun setupMap() {
         map.setMultiTouchControls(true)
         map.controller.setZoom(15.0)
-        // 🔥 FIX: Yahan se null center logic hata di hai
     }
 
-    private fun fetchStopOneLocation(busId: String) {
-        val dbRef = FirebaseDatabase.getInstance().getReference("routes").child(busId).child("stop_1")
+    private fun fetchRouteStopsAndStart(busId: String) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("routes").child(busId)
 
         dbRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()) {
-                    val lat = snapshot.child("latitude").value.toString().toDoubleOrNull()
-                    val lng = snapshot.child("longitude").value.toString().toDoubleOrNull()
+                if (snapshot.exists() && snapshot.childrenCount > 0) {
+                    val stopsList = snapshot.children.toList()
 
-                    if (lat != null && lng != null) {
-                        studentStopLocation = GeoPoint(lat, lng)
+                    // 1. Pickup Stop (Start) - BLUE PIN
+                    val firstStop = stopsList.first()
+                    val lat1 = firstStop.child("latitude").value.toString().toDoubleOrNull()
+                    val lng1 = firstStop.child("longitude").value.toString().toDoubleOrNull()
 
-                        // 🔥 FIX: Jab real location aa jaye, TAB marker lagao aur center karo
-                        addStudentStopMarker()
+                    if (lat1 != null && lng1 != null) {
+                        studentStopLocation = GeoPoint(lat1, lng1)
+                        addColoredPin(studentStopLocation!!, "Pickup Stop", Color.BLUE)
                         map.controller.setCenter(studentStopLocation)
-
-                        // Phir bus ki tracking shuru karo
-                        startLiveTracking()
                     }
+
+                    // 2. Drop-off Stop (End) - RED PIN
+                    if (stopsList.size > 1) {
+                        val lastStop = stopsList.last()
+                        val lat2 = lastStop.child("latitude").value.toString().toDoubleOrNull()
+                        val lng2 = lastStop.child("longitude").value.toString().toDoubleOrNull()
+
+                        if (lat2 != null && lng2 != null) {
+                            val dropOffLocation = GeoPoint(lat2, lng2)
+                            addColoredPin(dropOffLocation, "Final Drop-off", Color.RED)
+                        }
+                    }
+
+                    startLiveTracking()
                 } else {
-                    Toast.makeText(this@ParentLiveTrackingActivity, "Stop 1 not found in routes!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ParentLiveTrackingActivity, "Route not found in database!", Toast.LENGTH_SHORT).show()
                 }
             }
             override fun onCancelled(error: DatabaseError) {}
         })
     }
 
-    private fun addStudentStopMarker() {
-        // 🔥 FIX: Safe Call. Agar location null nahi hai toh hi marker lagao
-        studentStopLocation?.let { location ->
-            val stopMarker = Marker(map)
-            stopMarker.position = location
-            stopMarker.title = "Pickup Stop"
-            map.overlays.add(stopMarker)
-            map.invalidate()
-        }
+    private fun addColoredPin(geoPoint: GeoPoint, title: String, pinColor: Int) {
+        val marker = Marker(map)
+        marker.position = geoPoint
+        marker.title = title
+
+        val icon = ContextCompat.getDrawable(this, R.drawable.ic_custom_pin)?.mutate()
+        icon?.setTint(pinColor)
+        marker.icon = icon
+
+        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+        map.overlays.add(marker)
+        map.invalidate()
     }
 
     private fun startLiveTracking() {
@@ -147,23 +162,25 @@ class ParentLiveTrackingActivity : AppCompatActivity() {
             busMarker = Marker(map)
             busMarker?.title = "Bus is here"
 
-            busMarker?.icon = androidx.core.content.ContextCompat.getDrawable(this, R.drawable.ic_bus)
+            val busIcon = ContextCompat.getDrawable(this, R.drawable.ic_bus_marker)
+            if (busIcon != null) {
+                busMarker?.icon = busIcon
+            } else {
+                busMarker?.icon = ContextCompat.getDrawable(this, R.drawable.ic_bus)
+            }
 
             busMarker?.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-
             map.overlays.add(busMarker)
 
             map.controller.animateTo(geoPoint)
             map.controller.setZoom(18.0)
         }
 
-
         busMarker?.position = geoPoint
         map.invalidate()
     }
 
     private fun calculateETAAndDistance(busLoc: GeoPoint) {
-        // 🔥 FIX: Agar internet masle ki wajah se Stop location abhi tak null hai toh Crash na ho, wapis chala jaye
         val stopLoc = studentStopLocation ?: return
 
         val busLocationObj = Location("Bus").apply {
@@ -187,7 +204,7 @@ class ParentLiveTrackingActivity : AppCompatActivity() {
         when {
             distanceInMeters < 100 -> {
                 tvEtaTime.text = "Arrived!"
-                tvEtaTime.setTextColor(android.graphics.Color.GREEN)
+                tvEtaTime.setTextColor(Color.GREEN)
                 tvLiveStatus.text = "Bus is at your stop."
             }
             timeInMinutes <= 0 -> {
