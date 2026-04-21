@@ -51,23 +51,49 @@ class AssignStudentActivity : AppCompatActivity() {
     }
 
     private fun loadParents() {
-        dbRef.child("users").orderByChild("role").equalTo("parent")
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val parentNames = ArrayList<String>()
-                    if (snapshot.exists()) {
-                        for (parentSnap in snapshot.children) {
-                            val name = parentSnap.child("name").value.toString()
-                            val id = parentSnap.key.toString() // Firebase UID
-                            parentNames.add(name)
-                            parentMap[name] = id
+        // 🔥 STEP 1: Pehle check karo kin parents ko students assign ho chuke hain
+        dbRef.child("students").addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(studentSnapshot: DataSnapshot) {
+
+                val assignedParentIds = HashSet<String>() // Jin parents ke paas bache hain, unki list
+
+                if (studentSnapshot.exists()) {
+                    for (studentSnap in studentSnapshot.children) {
+                        val parentId = studentSnap.child("parentId").value?.toString()
+                        if (parentId != null) {
+                            assignedParentIds.add(parentId) // ID list mein daal do
                         }
-                        val adapter = ArrayAdapter(this@AssignStudentActivity, android.R.layout.simple_dropdown_item_1line, parentNames)
-                        spinnerParent.setAdapter(adapter)
                     }
                 }
-                override fun onCancelled(error: DatabaseError) {}
-            })
+
+                // 🔥 STEP 2: Ab Parents load karo aur filter lagao
+                dbRef.child("users").orderByChild("role").equalTo("parent")
+                    .addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(parentSnapshot: DataSnapshot) {
+                            val parentNames = ArrayList<String>()
+                            parentMap.clear() // Purana data clear karne ke liye
+
+                            if (parentSnapshot.exists()) {
+                                for (parentSnap in parentSnapshot.children) {
+                                    val id = parentSnap.key.toString()
+
+                                    // 🚀 ASLI JADOO: Agar ID assigned list mein NAHI hai, tabhi add karo
+                                    if (!assignedParentIds.contains(id)) {
+                                        val name = parentSnap.child("name").value.toString()
+                                        parentNames.add(name)
+                                        parentMap[name] = id
+                                    }
+                                }
+
+                                val adapter = ArrayAdapter(this@AssignStudentActivity, android.R.layout.simple_dropdown_item_1line, parentNames)
+                                spinnerParent.setAdapter(adapter)
+                            }
+                        }
+                        override fun onCancelled(error: DatabaseError) {}
+                    })
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        })
     }
 
     private fun loadBuses() {

@@ -21,6 +21,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FinalProjectSmartBusTrackingSystem">
         <activity
+            android:name=".Parent_Dashboard.ParentLiveTrackingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Parent_Dashboard.ParentDashboard"
+            android:exported="false" />
+        <activity
             android:name=".Driver_Dashboard.ActiveTripActivity"
             android:exported="false" />
         <activity
@@ -71,10 +77,6 @@
         <activity
             android:name=".Admin_Dashboard.ManageUsersActivity"
             android:exported="false" />
-        <activity
-            android:name=".Admin_Dashboard.ParentDashboard"
-            android:exported="false"
-            android:label="Parent Dashboard" />
         <activity
             android:name=".Driver_Dashboard.DriverDashboard"
             android:exported="false"

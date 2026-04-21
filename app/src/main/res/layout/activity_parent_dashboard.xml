@@ -1,10 +1,139 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Admin_Dashboard.ParentDashboard">
+    android:orientation="vertical"
+    android:padding="32dp"
+    android:background="#F8F9FA">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:id="@+id/tv_parent_welcome"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Parents Dashboard"
+        android:textAlignment="center"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:textColor="#202124"
+        android:layout_marginTop="16dp"/>
+
+    <TextView
+        android:id="@+id/tv_child_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Student: Loading..."
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        android:textColor="#6200EA"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="32dp"/>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="6dp"
+        android:layout_marginBottom="32dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:background="@android:color/white">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Transport Details"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#1976D2"
+                android:layout_marginBottom="20dp"/>
+
+            <TextView
+                android:id="@+id/tv_parent_bus_details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Assigned Bus: --"
+                android:textSize="16sp"
+                android:textColor="#333333"
+                android:layout_marginBottom="12dp"
+                app:drawableStartCompat="@drawable/ic_bus_marker"
+                app:drawableTint="#757575"
+                android:drawablePadding="16dp"
+                android:gravity="center_vertical"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="12dp"/>
+
+            <TextView
+                android:id="@+id/tv_parent_route_details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Route: Loading..."
+                android:textSize="16sp"
+                android:textColor="#333333"
+                android:layout_marginBottom="12dp"
+                app:drawableStartCompat="@android:drawable/ic_menu_directions"
+                app:drawableTint="#757575"
+                android:drawablePadding="16dp"
+                android:gravity="center_vertical"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="12dp"/>
+
+            <TextView
+                android:id="@+id/tv_parent_driver_details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Driver: -- \nPhone: --"
+                android:textSize="16sp"
+                android:textColor="#333333"
+                app:drawableStartCompat="@android:drawable/ic_menu_call"
+                app:drawableTint="#757575"
+                android:drawablePadding="16dp"
+                android:gravity="center_vertical"/>
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_track_child_bus"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:text="Track Live Location"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:cornerRadius="12dp"
+        android:backgroundTint="#F57C00"
+        app:icon="@android:drawable/ic_menu_mylocation"
+        app:iconGravity="textStart"
+        android:layout_marginBottom="16dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_parent_logout"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="Logout"
+        android:textSize="16sp"
+        app:cornerRadius="12dp"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:textColor="#D32F2F"
+        app:strokeColor="#D32F2F"
+        app:strokeWidth="2dp"/>
+
+</LinearLayout>

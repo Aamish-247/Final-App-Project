@@ -45,7 +45,7 @@ class DriverDashboard : AppCompatActivity() {
             if (currentBusId != null && currentBusId != "Not Assigned") {
                 val uid = auth.currentUser?.uid
                 if (uid != null) {
-                    dbRef.child(uid).child("isTripActive").setValue(true)
+                    FirebaseDatabase.getInstance().getReference("buses").child(currentBusId!!).child("isTripActive").setValue(true)
                 }
 
                 val intent = Intent(this, ActiveTripActivity::class.java)
@@ -75,9 +75,6 @@ class DriverDashboard : AppCompatActivity() {
                     tvWelcome.text = "Welcome, $driverName"
 
                     val busId = snapshot.child("assignedBusId").value?.toString()
-                    val isTripActive = snapshot.child("isTripActive").value as? Boolean ?: false
-
-                    isTripRunning = isTripActive
 
                     if (busId == null || busId == "null" || busId == "Not Assigned") {
                         currentBusId = null
@@ -85,6 +82,7 @@ class DriverDashboard : AppCompatActivity() {
                         tvShiftTiming.text = "Shift: --:-- to --:--"
                         btnStartTrip.text = "No Bus Assigned"
                         btnStartTrip.setBackgroundColor(android.graphics.Color.GRAY)
+                        isTripRunning = false
                     }
                     else {
                         currentBusId = busId
@@ -93,15 +91,24 @@ class DriverDashboard : AppCompatActivity() {
                         val eTime = snapshot.child("shiftEnd").value?.toString() ?: "--"
                         tvShiftTiming.text = "Shift: $sTime to $eTime"
 
-                        if (isTripActive) {
-                            btnStartTrip.text = "Resume Trip"
-                            btnStartTrip.setBackgroundColor("#FF9800".toColorInt())
-                        }
-                        else {
+                        FirebaseDatabase.getInstance().getReference("buses").child(busId)
+                            .addValueEventListener(object : ValueEventListener {
+                                override fun onDataChange(busSnap: DataSnapshot) {
+                                    if (busSnap.exists()) {
+                                        val isTripActive = busSnap.child("isTripActive").value as? Boolean ?: false
+                                        isTripRunning = isTripActive
 
-                            btnStartTrip.text = "Start Trip"
-                            btnStartTrip.setBackgroundColor("#1976D2".toColorInt())
-                        }
+                                        if (isTripActive) {
+                                            btnStartTrip.text = "Resume Trip"
+                                            btnStartTrip.setBackgroundColor("#FF9800".toColorInt())
+                                        } else {
+                                            btnStartTrip.text = "Start Trip"
+                                            btnStartTrip.setBackgroundColor("#1976D2".toColorInt())
+                                        }
+                                    }
+                                }
+                                override fun onCancelled(error: DatabaseError) {}
+                            })
                     }
                 }
             }

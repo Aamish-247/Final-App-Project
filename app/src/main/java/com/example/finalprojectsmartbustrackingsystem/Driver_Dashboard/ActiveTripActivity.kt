@@ -57,6 +57,7 @@ class ActiveTripActivity : AppCompatActivity() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         setupLocationCallback()
         startLocationUpdates()
+        updateLocationInFirebase(0.0, 0.0)
 
         // 3. Recenter Button Logic (Aapke XML mein btn_recenter ID honi chahiye)
         findViewById<View>(R.id.btn_recenter).setOnClickListener {
@@ -209,13 +210,14 @@ class ActiveTripActivity : AppCompatActivity() {
         updates["buses/$busId/isAssigned"] = false
         updates["buses/$busId/assignedDriverId"] = "Not Assigned"
         updates["buses/$busId/assignedDriverName"] = "Not Assigned"
+        updates["buses/$busId/isTripActive"] = false
 
         updates["users/$driverUid/isAvailable"] = true
         updates["users/$driverUid/assignedBusId"] = null
         updates["users/$driverUid/assignedBusName"] = "Not Assigned"
         updates["users/$driverUid/shiftStart"] = "--:--"
         updates["users/$driverUid/shiftEnd"] = "--:--"
-        updates["users/$driverUid/isTripActive"] = false
+
 
         if (currentDriverPoint != null) {
             updates["buses/$busId/lastLat"] = currentDriverPoint!!.latitude

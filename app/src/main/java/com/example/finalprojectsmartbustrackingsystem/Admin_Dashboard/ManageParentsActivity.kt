@@ -21,8 +21,6 @@ class ManageParentsActivity : AppCompatActivity() {
     private lateinit var rvParents: RecyclerView
     private lateinit var dbRef: DatabaseReference
     private lateinit var parentList: ArrayList<ParentModel>
-
-    // Naya Variable: Adapter ko class level par define kiya hai
     private lateinit var parentAdapter: RecyclerView.Adapter<ParentViewHolder>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,10 +34,7 @@ class ManageParentsActivity : AppCompatActivity() {
         parentList = arrayListOf<ParentModel>()
         dbRef = FirebaseDatabase.getInstance().getReference("users")
 
-        // 1. Adapter ko sirf ek dafa initialize karna
         initAdapter()
-
-        // 2. Data mangwana
         getParentsData()
 
         findViewById<MaterialButton>(R.id.btn_add_new_parent).setOnClickListener {
@@ -59,20 +54,13 @@ class ManageParentsActivity : AppCompatActivity() {
                 holder.name.text = current.name
                 holder.id.text = "ID: ${current.parentId}"
 
-                // --- DELETE LOGIC ---
                 holder.btnDelete.setOnClickListener {
                     val builder = AlertDialog.Builder(this@ManageParentsActivity)
                     builder.setTitle("Delete Parent")
-                    builder.setMessage("Do you want to delete ${current.name} from the list?")
-                    builder.setPositiveButton("Yes, Delete") { dialog, _ ->
+                    builder.setMessage("Are you sure you want to delete ${current.name} and all linked students?")
+                    builder.setPositiveButton("Yes, Delete All") { dialog, _ ->
                         current.uid?.let { uid ->
-                            dbRef.child(uid).removeValue()
-                                .addOnSuccessListener {
-                                    Toast.makeText(this@ManageParentsActivity, "Parent Deleted Successfully", Toast.LENGTH_SHORT).show()
-                                }
-                                .addOnFailureListener {
-                                    Toast.makeText(this@ManageParentsActivity, "Error: ${it.message}", Toast.LENGTH_SHORT).show()
-                                }
+                            deleteParentWithCascade(uid)
                         }
                         dialog.dismiss()
                     }
@@ -82,7 +70,6 @@ class ManageParentsActivity : AppCompatActivity() {
                     builder.show()
                 }
 
-                // --- EDIT LOGIC ---
                 holder.btnEdit.setOnClickListener {
                     val intent = Intent(this@ManageParentsActivity, AddParentActivity::class.java)
                     intent.putExtra("action", "edit")
@@ -96,30 +83,54 @@ class ManageParentsActivity : AppCompatActivity() {
 
             override fun getItemCount(): Int = parentList.size
         }
-
-        // RecyclerView ko adapter assign kar diya
         rvParents.adapter = parentAdapter
     }
 
     private fun getParentsData() {
-        // Sirf un users ko filter karna jinka role 'parent' hai
         dbRef.orderByChild("role").equalTo("parent")
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    parentList.clear() // Purani list saaf ki
+                    parentList.clear()
                     if (snapshot.exists()) {
                         for (parentSnap in snapshot.children) {
                             val data = parentSnap.getValue(ParentModel::class.java)
                             data?.let { parentList.add(it) }
                         }
                     }
-                    // MAIN FIX: Adapter ko batana ke data update ho gaya hai taake wo fauran UI refresh kare
                     parentAdapter.notifyDataSetChanged()
                 }
 
                 override fun onCancelled(error: DatabaseError) {
                     Toast.makeText(this@ManageParentsActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
                 }
+            })
+    }
+
+    private fun deleteParentWithCascade(parentId: String) {
+        val rootRef = FirebaseDatabase.getInstance().reference
+
+        rootRef.child("students").orderByChild("parentId").equalTo(parentId)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val updates = HashMap<String, Any?>()
+
+                    if (snapshot.exists()) {
+                        for (studentSnap in snapshot.children) {
+                            updates["students/${studentSnap.key}"] = null
+                        }
+                    }
+
+                    // 2. Parent ko users node se delete karo
+                    updates["users/$parentId"] = null
+
+                    // 3. Ek hi atomic operation mein sab delete karein
+                    rootRef.updateChildren(updates).addOnSuccessListener {
+                        Toast.makeText(this@ManageParentsActivity, "Parent and linked students removed successfully", Toast.LENGTH_SHORT).show()
+                    }.addOnFailureListener {
+                        Toast.makeText(this@ManageParentsActivity, "Delete failed: ${it.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                override fun onCancelled(error: DatabaseError) {}
             })
     }
 
