@@ -22,6 +22,7 @@ class ParentDashboard : AppCompatActivity() {
     private lateinit var dbRefBuses: DatabaseReference
     private lateinit var dbRefRoutes: DatabaseReference
     private lateinit var tvChildInfo: TextView
+    private lateinit var tvStudentStatus: TextView
     private lateinit var tvBusDetails: TextView
     private lateinit var tvRouteDetails: TextView
     private lateinit var tvDriverDetails: TextView
@@ -34,6 +35,9 @@ class ParentDashboard : AppCompatActivity() {
 
     private var childBusId: String? = null
     private var isTripRunning: Boolean = false
+    private var previousStudentStatus: String = ""
+
+    private val appStartTime = System.currentTimeMillis()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +52,7 @@ class ParentDashboard : AppCompatActivity() {
         dbRefRoutes = FirebaseDatabase.getInstance().getReference("routes")
 
         tvChildInfo = findViewById(R.id.tv_child_info)
+        tvStudentStatus = findViewById(R.id.tv_student_status)
         tvBusDetails = findViewById(R.id.tv_parent_bus_details)
         tvRouteDetails = findViewById(R.id.tv_parent_route_details)
         tvDriverDetails = findViewById(R.id.tv_parent_driver_details)
@@ -55,6 +60,7 @@ class ParentDashboard : AppCompatActivity() {
         btnLogout = findViewById(R.id.btn_parent_logout)
 
         fetchParentAndStudentData()
+        listenForBroadcastAlerts()
 
         btnLogout.setOnClickListener {
             auth.signOut()
@@ -93,7 +99,31 @@ class ParentDashboard : AppCompatActivity() {
                         val sName = childSnap.child("studentName").value?.toString() ?: "Student"
                         val busId = childSnap.child("busId").value?.toString()
 
+                        val currentStatus = childSnap.child("attendanceStatus").value?.toString() ?: "Pending"
+
                         tvChildInfo.text = "Student: $sName"
+                        val formattedStatus = currentStatus.replace("_", " ").replaceFirstChar { it.uppercase() }
+                        tvStudentStatus.text = "Status: $formattedStatus"
+
+                        if (previousStudentStatus.isNotEmpty() && previousStudentStatus != currentStatus) {
+                            val statusLower = currentStatus.lowercase()
+                            if (statusLower == "picked up" || statusLower == "pick_up" || statusLower == "picked_up") {
+                                sendStatusNotification("✅ Picked Up!", "$sName has boarded the bus safely.", 2)
+                            } else if (statusLower == "dropped off" || statusLower == "drop_off" || statusLower == "dropped") {
+                                sendStatusNotification("🏠 Dropped Off!", "$sName has been dropped off safely.", 3)
+                            }
+                        }
+                        // Status ko save kar liya taake agli dafa compare kar sakein
+                        previousStudentStatus = currentStatus
+
+
+                        // Colors ki logic (Jo humne pehle set ki thi)
+                        when (currentStatus.lowercase()) {
+                            "picked up", "pick_up", "picked_up" -> tvStudentStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
+                            "dropped off", "drop_off", "dropped" -> tvStudentStatus.setTextColor(android.graphics.Color.parseColor("#2196F3"))
+                            "absent", "on leave", "leave" -> tvStudentStatus.setTextColor(android.graphics.Color.parseColor("#E53935"))
+                            else -> tvStudentStatus.setTextColor(android.graphics.Color.parseColor("#F57C00"))
+                        }
 
                         if (busId != null && busId != "Not Assigned") {
                             childBusId = busId
@@ -124,7 +154,6 @@ class ParentDashboard : AppCompatActivity() {
                         startDistanceMonitor(busId)
                     }
 
-                    // 2. 🔥 FIX: Driver Info (Spelling theek ki hai - assigneddriverid)
                     val driverId = busSnap.child("assignedDriverId").value?.toString()
                     if (driverId != null && driverId.isNotEmpty()) {
                         FirebaseDatabase.getInstance().getReference("users").child(driverId)
@@ -224,6 +253,69 @@ class ParentDashboard : AppCompatActivity() {
         notificationManager.notify(1, builder.build())
     }
 
+    private fun sendStatusNotification(title: String, message: String, notifId: Int) {
+        val channelId = "BusAlerts"
+        val notificationManager = getSystemService(android.content.Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val channel = android.app.NotificationChannel(channelId, "Bus Status Alerts", android.app.NotificationManager.IMPORTANCE_HIGH)
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val builder = androidx.core.app.NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_bus) // Agar error aaye toh isay android.R.drawable.ic_dialog_info kar lijiye ga
+            .setContentTitle(title)
+            .setContentText(message)
+            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+
+        notificationManager.notify(notifId, builder.build())
+    }
+
+    private fun listenForBroadcastAlerts() {
+        val alertsRef = FirebaseDatabase.getInstance().getReference("broadcast_alerts")
+
+        // 🔥 addChildEventListener use kar rahe hain taake jaise hi NAYA child aaye, yeh catch kar le
+        alertsRef.addChildEventListener(object : ChildEventListener {
+            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                val timestamp = snapshot.child("timestamp").getValue(Long::class.java) ?: 0L
+                val audience = snapshot.child("audience").value?.toString() ?: ""
+                val type = snapshot.child("type").value?.toString() ?: "Alert"
+                val message = snapshot.child("message").value?.toString() ?: ""
+
+                // 1. Check: Kya yeh message app khulne ke BAAD aaya hai?
+                // 2. Check: Kya iski audience 'All' ya 'Parents Only' hai?
+                if (timestamp > appStartTime) {
+                    if (audience == "All" || audience == "Parents Only") {
+                        sendBroadcastNotification(type, message)
+                    }
+                }
+            }
+            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {}
+            override fun onChildRemoved(snapshot: DataSnapshot) {}
+            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
+
+    private fun sendBroadcastNotification(type: String, message: String) {
+        val channelId = "SchoolBroadcasts"
+        val notificationManager = getSystemService(android.content.Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val channel = android.app.NotificationChannel(channelId, "School Broadcasts", android.app.NotificationManager.IMPORTANCE_HIGH)
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val builder = androidx.core.app.NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(android.R.drawable.ic_dialog_alert) // Broadcast icon
+            .setContentTitle("📢 $type Alert")
+            .setContentText(message)
+            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_MAX) // Sab se upar show hoga
+            .setAutoCancel(true)
+
+        notificationManager.notify(System.currentTimeMillis().toInt(), builder.build()) // Har message ki alag ID
+    }
     private fun showNoBusAssigned() {
         tvBusDetails.text = "Bus: Not Assigned"
         btnTrackBus.isEnabled = false

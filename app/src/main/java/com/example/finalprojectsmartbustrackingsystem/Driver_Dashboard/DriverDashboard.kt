@@ -26,6 +26,8 @@ class DriverDashboard : AppCompatActivity() {
     private var currentBusId: String? = null
     private var isTripRunning: Boolean = false
 
+    private val appStartTime = System.currentTimeMillis()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.driver_dashboard)
@@ -40,6 +42,8 @@ class DriverDashboard : AppCompatActivity() {
         btnSOS = findViewById(R.id.btn_sos_emergency)
 
         fetchDriverDetails()
+        listenForBroadcastAlerts()
+
 
         btnStartTrip.setOnClickListener {
             if (currentBusId != null && currentBusId != "Not Assigned") {
@@ -154,5 +158,50 @@ class DriverDashboard : AppCompatActivity() {
             .addOnFailureListener { e ->
                 Toast.makeText(this, "Failed to send SOS: ${e.message}", Toast.LENGTH_LONG).show()
             }
+    }
+    private fun listenForBroadcastAlerts() {
+        val alertsRef = FirebaseDatabase.getInstance().getReference("broadcast_alerts")
+
+        // 🔥 addChildEventListener use kar rahe hain taake jaise hi NAYA child aaye, yeh catch kar le
+        alertsRef.addChildEventListener(object : ChildEventListener {
+            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                val timestamp = snapshot.child("timestamp").getValue(Long::class.java) ?: 0L
+                val audience = snapshot.child("audience").value?.toString() ?: ""
+                val type = snapshot.child("type").value?.toString() ?: "Alert"
+                val message = snapshot.child("message").value?.toString() ?: ""
+
+                // 1. Check: Kya yeh message app khulne ke BAAD aaya hai?
+                // 2. Check: Kya iski audience 'All' ya 'Parents Only' hai?
+                if (timestamp > appStartTime) {
+                    if (audience == "All" || audience == "Drivers Only")
+                    {
+                        sendBroadcastNotification(type, message)
+                    }
+                }
+            }
+            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {}
+            override fun onChildRemoved(snapshot: DataSnapshot) {}
+            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
+
+    private fun sendBroadcastNotification(type: String, message: String) {
+        val channelId = "SchoolBroadcasts"
+        val notificationManager = getSystemService(android.content.Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val channel = android.app.NotificationChannel(channelId, "School Broadcasts", android.app.NotificationManager.IMPORTANCE_HIGH)
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val builder = androidx.core.app.NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(android.R.drawable.ic_dialog_alert) // Broadcast icon
+            .setContentTitle("📢 $type Alert")
+            .setContentText(message)
+            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_MAX) // Sab se upar show hoga
+            .setAutoCancel(true)
+
+        notificationManager.notify(System.currentTimeMillis().toInt(), builder.build()) // Har message ki alag ID
     }
 }

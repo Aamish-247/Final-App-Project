@@ -28,6 +28,16 @@
         android:textAlignment="center"
         android:textColor="#6200EA"
         android:layout_marginTop="8dp"
+        android:layout_marginBottom="4dp"/>
+    <TextView
+        android:id="@+id/tv_student_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Status: Loading..."
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        android:textColor="#F57C00"
         android:layout_marginBottom="32dp"/>
 
     <com.google.android.material.card.MaterialCardView

@@ -57,7 +57,7 @@ class ActiveTripActivity : AppCompatActivity() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         setupLocationCallback()
         startLocationUpdates()
-        updateLocationInFirebase(0.0, 0.0)
+        updateLocationInFirebase(33.6844, 73.0479)
 
         // 3. Recenter Button Logic (Aapke XML mein btn_recenter ID honi chahiye)
         findViewById<View>(R.id.btn_recenter).setOnClickListener {
