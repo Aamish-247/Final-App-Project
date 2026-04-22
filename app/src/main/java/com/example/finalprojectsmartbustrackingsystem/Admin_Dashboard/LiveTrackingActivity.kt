@@ -28,19 +28,17 @@ class LiveTrackingActivity : AppCompatActivity() {
     private lateinit var map: MapView
     private lateinit var btnRefresh: MaterialCardView
 
-    // Database references alag alag kar diye hain safai ke liye
     private lateinit var dbRefBuses: DatabaseReference
     private lateinit var dbRefLive: DatabaseReference
     private lateinit var dbRefRoutes: DatabaseReference
 
-    // HashMap to keep track of existing markers (BusID -> Marker)
+    // 🔥 SECRET WEAPON: Yeh list yaad rakhegi ke kis bus ka icon kahan hai
     private val busMarkers = HashMap<String, Marker>()
     private var liveLocationListener: ValueEventListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // OSMDroid Configuration
         val sharedPrefs = getSharedPreferences("osmdroid", Context.MODE_PRIVATE)
         Configuration.getInstance().load(this, sharedPrefs)
 
@@ -49,17 +47,16 @@ class LiveTrackingActivity : AppCompatActivity() {
         map = findViewById(R.id.map_live_tracking)
         btnRefresh = findViewById(R.id.btn_refresh_map)
 
-        // Firebase References Initialize karna
         dbRefBuses = FirebaseDatabase.getInstance().getReference("buses")
         dbRefLive = FirebaseDatabase.getInstance().getReference("live_locations")
         dbRefRoutes = FirebaseDatabase.getInstance().getReference("routes")
 
         setupMap()
 
-        // LOGIC 1: Map load hote hi sab buses ko Last Location ya Stop 1 par lagana
+        // 1. Pehle aakhri parked location dhoondo (Ya Stop 1 par lagao)
         loadInitialBusPositions()
 
-        // LOGIC 2: Live updates sunna
+        // 2. Ab background mein live location ka intezar karo
         startListeningToLiveLocations()
 
         btnRefresh.setOnClickListener {
@@ -69,7 +66,7 @@ class LiveTrackingActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        map.onResume() // Map ko refresh karne ke liye zaroori hai
+        map.onResume()
     }
 
     override fun onPause() {
@@ -79,7 +76,6 @@ class LiveTrackingActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // Listener remove karna zaroori hai warna background mein crash hoga
         liveLocationListener?.let { dbRefLive.removeEventListener(it) }
     }
 
@@ -92,24 +88,23 @@ class LiveTrackingActivity : AppCompatActivity() {
         mapController.setCenter(defaultPoint)
     }
 
-    // --- PHASE 1: Khari hui (Idle / Parked) Buses Load Karna ---
+    // --- LOGIC 1: Khari hui (Idle / Parked) Buses Load Karna ---
     private fun loadInitialBusPositions() {
         dbRefBuses.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (busSnap in snapshot.children) {
                     val busId = busSnap.key.toString()
-                    val routeStatus = busSnap.child("assignedRoute").value?.toString()
+                    val isAssigned = busSnap.child("isAssigned").value?.toString()?.toBoolean() ?: false
 
-                    if (routeStatus == "Assigned") {
+                    if (isAssigned) {
                         val lastLat = busSnap.child("lastLat").value?.toString()?.toDoubleOrNull()
                         val lastLng = busSnap.child("lastLng").value?.toString()?.toDoubleOrNull()
 
                         if (lastLat != null && lastLng != null) {
-
+                            // Agar last location hai, toh map par pin laga do
                             updateOrAddMarker(busId, GeoPoint(lastLat, lastLng))
-                        }
-                        else {
-                            // Agar nayi bus hai jisne aaj tak trip nahi kiya, toh Stop 1 par laga do
+                        } else {
+                            // Agar nayi bus hai, toh uske pehle stop par pin laga do
                             fetchStop1AndPlaceMarker(busId)
                         }
                     }
@@ -124,13 +119,17 @@ class LiveTrackingActivity : AppCompatActivity() {
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
-                        val lat = snapshot.child("latitude").value.toString().toDouble()
-                        val lng = snapshot.child("longitude").value.toString().toDouble()
-                        val stop1Point = GeoPoint(lat, lng)
+                        // 🔥 CRASH FIX: toDoubleOrNull() lagaya hai taake app band na ho
+                        val lat = snapshot.child("latitude").value?.toString()?.toDoubleOrNull()
+                        val lng = snapshot.child("longitude").value?.toString()?.toDoubleOrNull()
 
-                        // Marker lagao agar live tracking se pehle aayi nahi
-                        if (!busMarkers.containsKey(busId)) {
-                            updateOrAddMarker(busId, stop1Point)
+                        if (lat != null && lng != null) {
+                            val stop1Point = GeoPoint(lat, lng)
+
+                            // Agar us bus ka icon pehle se nahi hai toh bana do
+                            if (!busMarkers.containsKey(busId)) {
+                                updateOrAddMarker(busId, stop1Point)
+                            }
                         }
                     }
                 }
@@ -138,7 +137,7 @@ class LiveTrackingActivity : AppCompatActivity() {
             })
     }
 
-    // --- PHASE 2: Automatic Live Update (Realtime) ---
+    // --- LOGIC 2: Automatic Live Update (Move hota nazar aana) ---
     private fun startListeningToLiveLocations() {
         liveLocationListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -146,24 +145,18 @@ class LiveTrackingActivity : AppCompatActivity() {
                     if (snapshot.exists()) {
                         for (busSnap in snapshot.children) {
                             val busId = busSnap.key.toString()
-                            val latStr = busSnap.child("latitude").value?.toString()
-                            val lngStr = busSnap.child("longitude").value?.toString()
+                            val lat = busSnap.child("latitude").value?.toString()?.toDoubleOrNull()
+                            val lng = busSnap.child("longitude").value?.toString()?.toDoubleOrNull()
 
-                            if (latStr != null && lngStr != null) {
-                                try {
-                                    val geoPoint = GeoPoint(latStr.toDouble(), lngStr.toDouble())
-                                    updateOrAddMarker(busId, geoPoint)
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                }
+                            if (lat != null && lng != null) {
+                                // Naye coordinates bhejo, icon khud wahan chala jayega!
+                                updateOrAddMarker(busId, GeoPoint(lat, lng))
                             }
                         }
                     }
                 }
             }
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@LiveTrackingActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
-            }
+            override fun onCancelled(error: DatabaseError) {}
         }
         liveLocationListener?.let { dbRefLive.addValueEventListener(it) }
     }
@@ -174,32 +167,35 @@ class LiveTrackingActivity : AppCompatActivity() {
         map.invalidate()
     }
 
+    // 🔥 THE CORE ENGINE: Marker lagana aur move karna
     private fun updateOrAddMarker(busId: String, newPosition: GeoPoint) {
         runOnUiThread {
             if (busMarkers.containsKey(busId)) {
+                // Agar bus pehle se map par hai, toh naya icon nahi banega, sirf Puraana icon aage move ho jayega
                 val existingMarker = busMarkers[busId]
                 existingMarker?.position = newPosition
             } else {
+                // Agar bus map par nahi hai, toh pehli dafa icon draw karo
                 val marker = Marker(map)
                 marker.position = newPosition
                 marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-
                 marker.infoWindow = null
                 marker.setOnMarkerClickListener { _, _ -> true }
 
                 marker.icon = createBusMarkerWithLabel(this, busId)
 
                 map.overlays.add(marker)
-                busMarkers[busId] = marker
+                busMarkers[busId] = marker // List mein save kar lo taake agli dafa sirf move karein
             }
 
-            // Map ko foran refresh karne ka command
+            // Map ko foran refresh karo taake movement nazar aaye
             map.invalidate()
         }
     }
 
+    // Yeh function bus ka khubsurat label banata hai
     private fun createBusMarkerWithLabel(context: Context, busNumber: String): Drawable {
-        val text = "$busNumber"
+        val text = busNumber
 
         val textPaint = Paint().apply {
             color = Color.BLACK
