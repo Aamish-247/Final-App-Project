@@ -17,7 +17,8 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
@@ -31,30 +32,34 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun performLogin() {
+    private fun performLogin()
+    {
 
-        val emailET = findViewById<EditText>(R.id.et_email)
-        val passwordET = findViewById<EditText>(R.id.et_password)
+        val emailbtn = findViewById<EditText>(R.id.et_email)
+        val passwordbtn = findViewById<EditText>(R.id.et_password)
 
-        val email = emailET.text.toString().trim()
-        val password = passwordET.text.toString().trim()
+        val email = emailbtn.text.toString().trim()
+        val password = passwordbtn.text.toString().trim()
 
-        if (email.isEmpty() || password.isEmpty()) {
+        if (email.isEmpty() || password.isEmpty())
+        {
             Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show()
             return
         }
 
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
+                if (task.isSuccessful)
+                {
                     val uid = auth.currentUser?.uid
 
-                    if (uid == null) {
+                    if (uid == null)
+                    {
                         Toast.makeText(this, "User not found", Toast.LENGTH_SHORT).show()
                         return@addOnCompleteListener
                     }
 
-                    // FIX 1: Node name 'users' hona chahiye
+                    // till that
                     val dbRef = FirebaseDatabase.getInstance().getReference("users").child(uid)
 
                     dbRef.get().addOnSuccessListener { snapshot ->
