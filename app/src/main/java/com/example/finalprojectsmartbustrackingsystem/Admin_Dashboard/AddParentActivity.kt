@@ -32,7 +32,7 @@ class AddParentActivity : AppCompatActivity() {
         val btnSave = findViewById<MaterialButton>(R.id.btn_save_parent)
         val layoutPassword = findViewById<TextInputLayout>(R.id.layout_password_parent)
 
-        // --- EDIT MODE CHECK ---
+
         val action = intent.getStringExtra("action")
         if (action == "edit") {
             isEditMode = true
@@ -98,8 +98,8 @@ class AddParentActivity : AppCompatActivity() {
                         "name" to name,
                         "email" to email,
                         "phone" to phone,
-                        "parentId" to parentCustomId, // Key updated to parentId
-                        "role" to "parent" // Role is now parent
+                        "parentId" to parentCustomId,
+                        "role" to "parent"
                     )
 
                     FirebaseDatabase.getInstance().getReference("users")

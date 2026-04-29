@@ -24,7 +24,7 @@ class AddBusActivity : AppCompatActivity() {
         val etBusCapacity = findViewById<TextInputEditText>(R.id.et_bus_capacity)
         val btnSave = findViewById<MaterialButton>(R.id.btn_save_bus)
 
-        // --- CHECK FOR EDIT MODE ---
+
         val action = intent.getStringExtra("action")
         if (action == "edit") {
             isEditMode = true
@@ -61,7 +61,7 @@ class AddBusActivity : AppCompatActivity() {
 
         val dbRef = com.google.firebase.database.FirebaseDatabase.getInstance().getReference("buses")
 
-        // MAP ko update kiya gaya hai (purani extra key nikal di hai)
+
         val busData = mapOf(
             "busId" to busId,
             "busName" to name,

@@ -89,7 +89,6 @@ class AddDriverActivity : AppCompatActivity() {
                     val randomId = Random.Default.nextInt(1000, 9999)
                     val driverCustomId = "DRV-$randomId"
 
-                    // UPDATED: isAvailable flag add kar diya taake Driver list mein show ho
                     val driverData = mapOf(
                         "uid" to uid,
                         "name" to name,
@@ -97,7 +96,7 @@ class AddDriverActivity : AppCompatActivity() {
                         "phone" to phone,
                         "driverId" to driverCustomId,
                         "role" to "driver",
-                        "isAvailable" to true // <--- YE ZAROORI HAI
+                        "isAvailable" to true
                     )
 
                     FirebaseDatabase.getInstance().getReference("users")

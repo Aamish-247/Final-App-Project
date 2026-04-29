@@ -22,30 +22,29 @@ class AdminDashboard : AppCompatActivity() {
         val btnNotif = findViewById<MaterialButton>(R.id.btn_send_alerts)
         val btnLogout = findViewById<MaterialButton>(R.id.btn_logout)
 
-        // 🔥 Start listening for emergencies
+
         listenForEmergencies()
 
-        // 1. User Management
+
         btnUser.setOnClickListener {
             startActivity(Intent(this, ManageUsersActivity::class.java))
         }
 
-        // 2. Manage Fleet
+
         btnBus.setOnClickListener {
             startActivity(Intent(this, ManageFleetActivity::class.java))
         }
 
-        // 3. Live Tracking
+
         btnMap.setOnClickListener {
             startActivity(Intent(this, LiveTrackingActivity::class.java))
         }
 
-        // 4. Notifications
+
         btnNotif.setOnClickListener {
             startActivity(Intent(this, BroadcastAlertsActivity::class.java))
         }
 
-        // 5. Logout
         btnLogout.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
             val intent = Intent(this, LoginActivity::class.java)
