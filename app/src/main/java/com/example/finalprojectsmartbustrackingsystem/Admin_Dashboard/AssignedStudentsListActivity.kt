@@ -23,7 +23,6 @@ class AssignedStudentsListActivity : AppCompatActivity() {
     private lateinit var dbRef: DatabaseReference
     private lateinit var studentList: ArrayList<StudentModel>
 
-    // Adapter ko class level par define kiya taake fauran refresh ho sake
     private lateinit var studentAdapter: RecyclerView.Adapter<StudentViewHolder>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,10 +36,9 @@ class AssignedStudentsListActivity : AppCompatActivity() {
         studentList = arrayListOf<StudentModel>()
         dbRef = FirebaseDatabase.getInstance().getReference("students")
 
-        // 1. Adapter ko sirf ek dafa initialize karna
+
         initAdapter()
 
-        // 2. Data mangwana
         getStudentsData()
 
         findViewById<MaterialButton>(R.id.btn_open_assign_form).setOnClickListener {
@@ -63,8 +61,7 @@ class AssignedStudentsListActivity : AppCompatActivity() {
                 holder.driverName.text = "Driver: ${current.driverName ?: "Not Assigned"}"
                 holder.parentName.text = "Parent: ${current.parentName ?: "Not Assigned"}"
 
-                // === NAYA HISSA: Pickup & Drop-off Show Karna ===
-                // Agar point save nahi hua (null hai) toh "Pending" show karega
+
                 val pickup = current.pickupStop?.replace("_", " ")?.capitalize() ?: "Pending"
                 val dropoff = current.dropoffStop?.replace("_", " ")?.capitalize() ?: "Pending"
 
@@ -72,11 +69,11 @@ class AssignedStudentsListActivity : AppCompatActivity() {
                 holder.dropoffInfo.text = "Drop-off: $dropoff"
 
 
-                // --- DELETE LOGIC ---
+
                 holder.btnDelete.setOnClickListener {
                     val builder = AlertDialog.Builder(this@AssignedStudentsListActivity)
                     builder.setTitle("Remove Assignment")
-                    builder.setMessage("Kya aap waqai ${current.studentName} ko is bus se remove karna chahte hain?")
+                    builder.setMessage("do you want to remove ${current.studentName} ?")
                     builder.setPositiveButton("Yes, Remove") { dialog, _ ->
                         current.studentId?.let { id ->
                             dbRef.child(id).removeValue()
@@ -99,14 +96,14 @@ class AssignedStudentsListActivity : AppCompatActivity() {
             override fun getItemCount(): Int = studentList.size
         }
 
-        // RecyclerView ko adapter assign kar diya
+
         rvStudents.adapter = studentAdapter
     }
 
     private fun getStudentsData() {
         dbRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                studentList.clear() // Purani list saaf karna
+                studentList.clear()
 
                 if (snapshot.exists()) {
                     for (studentSnap in snapshot.children) {
@@ -115,7 +112,6 @@ class AssignedStudentsListActivity : AppCompatActivity() {
                     }
                 }
 
-                // MAIN FIX: Adapter ko batana ke data update ho gaya hai (Fauran refresh karega)
                 studentAdapter.notifyDataSetChanged()
             }
 
@@ -131,7 +127,6 @@ class AssignedStudentsListActivity : AppCompatActivity() {
         val driverName: TextView = itemView.findViewById(R.id.tv_student_driver_name)
         val parentName: TextView = itemView.findViewById(R.id.tv_student_parent_name)
 
-        // === Naye Views Link Kiye ===
         val pickupInfo: TextView = itemView.findViewById(R.id.tv_student_pickup)
         val dropoffInfo: TextView = itemView.findViewById(R.id.tv_student_dropoff)
 

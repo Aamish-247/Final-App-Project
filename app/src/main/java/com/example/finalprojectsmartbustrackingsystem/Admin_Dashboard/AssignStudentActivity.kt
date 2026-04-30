@@ -16,17 +16,16 @@ class AssignStudentActivity : AppCompatActivity() {
 
     private lateinit var dbRef: DatabaseReference
 
-    // UI Elements
     private lateinit var etStudentName: TextInputEditText
     private lateinit var spinnerParent: AutoCompleteTextView
     private lateinit var spinnerBus: AutoCompleteTextView
     private lateinit var spinnerDriver: AutoCompleteTextView
     private lateinit var btnAssign: MaterialButton
 
-    // Data Maps (Naam dikhane ke liye aur ID save karne ke liye)
-    private val parentMap = HashMap<String, String>() // Name -> ParentId
-    private val busMap = HashMap<String, String>()    // Name -> BusId
-    private val driverMap = HashMap<String, String>() // Name -> DriverId
+
+    private val parentMap = HashMap<String, String>()
+    private val busMap = HashMap<String, String>()
+    private val driverMap = HashMap<String, String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +39,6 @@ class AssignStudentActivity : AppCompatActivity() {
         spinnerDriver = findViewById(R.id.spinner_select_driver)
         btnAssign = findViewById(R.id.btn_assign_student)
 
-        // Dropdowns mein Firebase se data load karein
         loadParents()
         loadBuses()
         loadDrivers()
@@ -51,33 +49,33 @@ class AssignStudentActivity : AppCompatActivity() {
     }
 
     private fun loadParents() {
-        // 🔥 STEP 1: Pehle check karo kin parents ko students assign ho chuke hain
+
         dbRef.child("students").addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(studentSnapshot: DataSnapshot) {
 
-                val assignedParentIds = HashSet<String>() // Jin parents ke paas bache hain, unki list
+                val assignedParentIds = HashSet<String>()
 
                 if (studentSnapshot.exists()) {
                     for (studentSnap in studentSnapshot.children) {
                         val parentId = studentSnap.child("parentId").value?.toString()
                         if (parentId != null) {
-                            assignedParentIds.add(parentId) // ID list mein daal do
+                            assignedParentIds.add(parentId)
                         }
                     }
                 }
 
-                // 🔥 STEP 2: Ab Parents load karo aur filter lagao
+
                 dbRef.child("users").orderByChild("role").equalTo("parent")
                     .addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(parentSnapshot: DataSnapshot) {
                             val parentNames = ArrayList<String>()
-                            parentMap.clear() // Purana data clear karne ke liye
+                            parentMap.clear()
 
                             if (parentSnapshot.exists()) {
                                 for (parentSnap in parentSnapshot.children) {
                                     val id = parentSnap.key.toString()
 
-                                    // 🚀 ASLI JADOO: Agar ID assigned list mein NAHI hai, tabhi add karo
+
                                     if (!assignedParentIds.contains(id)) {
                                         val name = parentSnap.child("name").value.toString()
                                         parentNames.add(name)
@@ -103,7 +101,7 @@ class AssignStudentActivity : AppCompatActivity() {
                 if (snapshot.exists()) {
                     for (busSnap in snapshot.children) {
                         val name = busSnap.child("busName").value.toString()
-                        val id = busSnap.key.toString() // BUS-XXXX ID
+                        val id = busSnap.key.toString()
                         busNames.add(name)
                         busMap[name] = id
                     }
@@ -123,7 +121,7 @@ class AssignStudentActivity : AppCompatActivity() {
                     if (snapshot.exists()) {
                         for (driverSnap in snapshot.children) {
                             val name = driverSnap.child("name").value.toString()
-                            val id = driverSnap.key.toString() // Firebase UID
+                            val id = driverSnap.key.toString()
                             driverNames.add(name)
                             driverMap[name] = id
                         }
@@ -141,13 +139,13 @@ class AssignStudentActivity : AppCompatActivity() {
         val selectedBus = spinnerBus.text.toString()
         val selectedDriver = spinnerDriver.text.toString()
 
-        // Validation
+
         if (studentName.isEmpty() || selectedParent.isEmpty() || selectedBus.isEmpty() || selectedDriver.isEmpty()) {
             Toast.makeText(this, "Please fill all fields and select from dropdowns", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // IDs nikalna Map se (taake database linkage sahi bane)
+
         val parentId = parentMap[selectedParent]
         val busId = busMap[selectedBus]
         val driverId = driverMap[selectedDriver]
@@ -157,11 +155,11 @@ class AssignStudentActivity : AppCompatActivity() {
             return
         }
 
-        // Generate Student ID (STD-XXXX)
+
         val randomId = Random.nextInt(1000, 9999)
         val studentId = "STD-$randomId"
 
-        // Data Object (Yahan IDs aur Names dono save ho rahe hain)
+
         val studentData = mapOf(
             "studentId" to studentId,
             "studentName" to studentName,
@@ -173,7 +171,7 @@ class AssignStudentActivity : AppCompatActivity() {
             "driverName" to selectedDriver
         )
 
-        // Save to Firebase 'students' node
+
         dbRef.child("students").child(studentId).setValue(studentData)
             .addOnSuccessListener {
                 showSuccessDialog(studentName)

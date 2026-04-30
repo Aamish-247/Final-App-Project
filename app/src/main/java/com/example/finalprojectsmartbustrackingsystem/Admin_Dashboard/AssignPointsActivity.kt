@@ -23,7 +23,7 @@ class AssignPointsActivity : AppCompatActivity() {
     private lateinit var tvBusInfo: TextView
     private lateinit var cardBusInfo: View
 
-    private val studentMap = HashMap<String, String>() // Sirf Name aur ID save karenge
+    private val studentMap = HashMap<String, String>()
     private val routeStopsList = ArrayList<String>()
 
     private var selectedStudentId: String? = null
@@ -41,15 +41,14 @@ class AssignPointsActivity : AppCompatActivity() {
         tvBusInfo = findViewById(R.id.tv_auto_fetched_bus)
         cardBusInfo = findViewById(R.id.card_bus_info)
 
-        // Activity start par sirf Students ke naam load honge
+
         loadOnlyStudents()
 
-        // === STEP 1: Admin dropdown se student select karega ===
         spinnerStudent.setOnItemClickListener { _, _, position, _ ->
             val selectedName = spinnerStudent.adapter.getItem(position).toString()
             selectedStudentId = studentMap[selectedName]
 
-            // Purana data saaf kar dein taake naya load ho sake
+
             spinnerPickup.text.clear()
             spinnerDropoff.text.clear()
             spinnerPickup.setAdapter(null)
@@ -58,23 +57,19 @@ class AssignPointsActivity : AppCompatActivity() {
             cardBusInfo.visibility = View.VISIBLE
             tvBusInfo.text = "Fetching assigned bus from record..."
 
-            // === STEP 2: Record se live fetch karna ke is student ko konsi bus assign hui thi ===
             fetchAssignedBusFromRecord(selectedStudentId!!)
         }
 
-        // === LOGIC: Pickup select hone par Drop-off list filter karna ===
         spinnerPickup.setOnItemClickListener { _, _, position, _ ->
             val selectedPickup = spinnerPickup.adapter.getItem(position).toString()
             updateDropoffList(selectedPickup)
         }
 
-        // === LOGIC: Drop-off select hone par Pickup list filter karna ===
         spinnerDropoff.setOnItemClickListener { _, _, position, _ ->
             val selectedDropoff = spinnerDropoff.adapter.getItem(position).toString()
             updatePickupList(selectedDropoff)
         }
 
-        // === STEP 5: Save button logic ===
         findViewById<MaterialButton>(R.id.btn_save_assignment).setOnClickListener {
             savePointsToDatabase()
         }
@@ -142,7 +137,6 @@ class AssignPointsActivity : AppCompatActivity() {
                         routeStopsList.add(formattedName)
                     }
 
-                    // Shuru mein dono dropdowns mein saari list daal dein
                     val stopsAdapter = ArrayAdapter(this@AssignPointsActivity, android.R.layout.simple_dropdown_item_1line, routeStopsList)
                     spinnerPickup.setAdapter(stopsAdapter)
                     spinnerDropoff.setAdapter(stopsAdapter)
@@ -156,14 +150,13 @@ class AssignPointsActivity : AppCompatActivity() {
         })
     }
 
-    // === FUNCTION: Drop-off ki list update karna (Pickup ko nikaal kar) ===
     private fun updateDropoffList(selectedPickup: String) {
         val filteredList = routeStopsList.filter { it != selectedPickup }
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, filteredList)
         spinnerDropoff.setAdapter(adapter)
     }
 
-    // === FUNCTION: Pickup ki list update karna (Drop-off ko nikaal kar) ===
+
     private fun updatePickupList(selectedDropoff: String) {
         val filteredList = routeStopsList.filter { it != selectedDropoff }
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, filteredList)

@@ -23,14 +23,13 @@ class BusListActivity : AppCompatActivity() {
     private lateinit var dbRef: DatabaseReference
     private lateinit var busList: ArrayList<BusModel>
 
-    // Naya Variable: Adapter ko class level par define kiya
     private lateinit var busAdapter: RecyclerView.Adapter<BusViewHolder>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bus_list)
 
-        // Initialize RecyclerView
+
         rvBuses = findViewById(R.id.rv_buses_list)
         rvBuses.layoutManager = LinearLayoutManager(this)
         rvBuses.setHasFixedSize(true)
@@ -38,13 +37,12 @@ class BusListActivity : AppCompatActivity() {
         busList = arrayListOf<BusModel>()
         dbRef = FirebaseDatabase.getInstance().getReference("buses")
 
-        // 1. Adapter ko sirf ek dafa initialize karna
+
         initAdapter()
 
-        // 2. Fetch Data from Firebase
+
         getBusesData()
 
-        // Add New Bus Button Click
         findViewById<MaterialButton>(R.id.btn_add_new_bus_from_list).setOnClickListener {
             val intent = Intent(this, AddBusActivity::class.java)
             startActivity(intent)
@@ -64,8 +62,7 @@ class BusListActivity : AppCompatActivity() {
                 holder.plate.text = "Plate: ${current.licensePlate}"
                 holder.capacity.text = "Seats: ${current.capacity}"
 
-                // --- DELETE LOGIC ---
-                // BusListActivity.kt mein delete button ki logic ko update karein
+
                 holder.btnDelete.setOnClickListener {
                     val builder = AlertDialog.Builder(this@BusListActivity)
                     builder.setTitle("Delete Bus")
@@ -73,30 +70,28 @@ class BusListActivity : AppCompatActivity() {
 
                     builder.setPositiveButton("Yes, Delete") { dialog, _ ->
                         val busId = current.busId
-                        val driverUid = current.assignedDriverId// Yeh BusModel mein hona chahiye
+                        val driverUid = current.assignedDriverId
 
                         if (busId != null) {
                             val rootRef = FirebaseDatabase.getInstance().reference
                             val updates = HashMap<String, Any?>()
 
-                            // 1. Bus ko database se delete karna
+
                             updates["buses/$busId"] = null
 
-                            // 2. Driver ko free karna (Agar koi driver assign tha)
+
                             if (!driverUid.isNullOrEmpty() && driverUid != "Not Assigned") {
                                 updates["users/$driverUid/isAvailable"] = true
                                 updates["users/$driverUid/assignedBusId"] = null
                                 updates["users/$driverUid/assignedBusName"] = "Not Assigned"
                             }
 
-                            // 3. Students ka data update karna jo is bus mein thay
                             rootRef.child("students").orderByChild("busId").equalTo(busId)
                                 .addListenerForSingleValueEvent(object : ValueEventListener {
                                     override fun onDataChange(snapshot: DataSnapshot) {
                                         for (studentSnap in snapshot.children) {
                                             val studentId = studentSnap.key
                                             if (studentId != null) {
-                                                // Student ke record se bus aur driver dono ki info hatana
                                                 updates["students/$studentId/busId"] = "Not Assigned"
                                                 updates["students/$studentId/busName"] = "Not Assigned"
                                                 updates["students/$studentId/driverId"] = "Not Assigned"
@@ -104,7 +99,7 @@ class BusListActivity : AppCompatActivity() {
                                             }
                                         }
 
-                                        // Atomic Update: Saara cleaning process aik hi dafa mein
+
                                         rootRef.updateChildren(updates).addOnSuccessListener {
                                             Toast.makeText(this@BusListActivity, "Bus and linked records updated successfully", Toast.LENGTH_SHORT).show()
                                         }.addOnFailureListener {
@@ -121,7 +116,7 @@ class BusListActivity : AppCompatActivity() {
                     builder.show()
                 }
 
-                // --- EDIT LOGIC ---
+
                 holder.btnEdit.setOnClickListener {
                     val intent = Intent(this@BusListActivity, AddBusActivity::class.java)
                     intent.putExtra("action", "edit")
@@ -136,7 +131,7 @@ class BusListActivity : AppCompatActivity() {
             override fun getItemCount(): Int = busList.size
         }
 
-        // RecyclerView ko adapter assign karna
+
         rvBuses.adapter = busAdapter
     }
 
@@ -150,7 +145,6 @@ class BusListActivity : AppCompatActivity() {
                         data?.let { busList.add(it) }
                     }
                 }
-                // MAIN FIX: Adapter ko data change hone ka signal dena
                 busAdapter.notifyDataSetChanged()
             }
 
@@ -160,7 +154,7 @@ class BusListActivity : AppCompatActivity() {
         })
     }
 
-    // ViewHolder class to link item_bus.xml views
+
     class BusViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val name: TextView = itemView.findViewById(R.id.tv_bus_display_name)
         val plate: TextView = itemView.findViewById(R.id.tv_bus_display_plate)

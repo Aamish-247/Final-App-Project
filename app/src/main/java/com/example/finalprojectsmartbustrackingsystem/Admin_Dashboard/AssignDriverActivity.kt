@@ -16,8 +16,8 @@ class AssignDriverActivity : AppCompatActivity() {
     private lateinit var spinnerDriver: AutoCompleteTextView
     private lateinit var spinnerBus: AutoCompleteTextView
 
-    private val driverMap = HashMap<String, String>() // Driver Name -> Driver ID
-    private val busMap = HashMap<String, String>() // Bus Name -> Bus ID
+    private val driverMap = HashMap<String, String>()
+    private val busMap = HashMap<String, String>()
 
     private var selectedDriverId: String? = null
     private var selectedBusId: String? = null
@@ -34,7 +34,7 @@ class AssignDriverActivity : AppCompatActivity() {
         spinnerBus = findViewById(R.id.spinner_select_bus_for_driver)
 
         loadDrivers()
-        loadBuses() // Naya Logic yahan apply hoga
+        loadBuses()
 
         spinnerDriver.setOnItemClickListener { _, _, position, _ ->
             selectedDriverName = spinnerDriver.adapter.getItem(position).toString()
@@ -56,7 +56,7 @@ class AssignDriverActivity : AppCompatActivity() {
     }
 
     private fun loadDrivers() {
-        // Query: users jahan role 'driver' ho AUR isAvailable true ho
+
         dbRef.child("users").orderByChild("isAvailable").equalTo(true)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -80,9 +80,9 @@ class AssignDriverActivity : AppCompatActivity() {
             })
     }
 
-    // NEW LOGIC: Sirf wahi buses load hongi jo 'isAssigned' false hain
+
     private fun loadBuses() {
-        // Query: buses node mein jahan isAssigned == false ho
+
         dbRef.child("buses").orderByChild("isAssigned").equalTo(false)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -110,19 +110,19 @@ class AssignDriverActivity : AppCompatActivity() {
             })
     }
 
-    // 2. UPDATED: Save karte waqt dono ko lock karo
+
     private fun saveAssignmentToDatabase() {
         val updates = HashMap<String, Any>()
 
-        // Driver update
+
         updates["users/${selectedDriverId}/assignedBusId"] = selectedBusId!!
         updates["users/${selectedDriverId}/assignedBusName"] = selectedBusName!!
-        updates["users/${selectedDriverId}/isAvailable"] = false // DRIVER LOCK!
+        updates["users/${selectedDriverId}/isAvailable"] = false
 
-        // Bus update
+
         updates["buses/${selectedBusId}/assignedDriverId"] = selectedDriverId!!
         updates["buses/${selectedBusId}/assignedDriverName"] = selectedDriverName!!
-        updates["buses/${selectedBusId}/isAssigned"] = true // BUS LOCK!
+        updates["buses/${selectedBusId}/isAssigned"] = true
 
         dbRef.updateChildren(updates).addOnSuccessListener {
             Toast.makeText(this, "Assignment Successful! Driver and Bus are Busy Now.", Toast.LENGTH_LONG).show()
