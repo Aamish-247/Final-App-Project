@@ -60,18 +60,14 @@ class ManageDriversActivity : AppCompatActivity() {
 
                 val busName = current.assignedBusName ?: "Not Assigned"
 
-                // === NAYA HISSA: Shift Timing Show Karna ===
                 val shiftStart = current.shiftStart ?: "--:--"
                 val shiftEnd = current.shiftEnd ?: "--:--"
                 holder.busInfo.text = "Bus: $busName\nShift: $shiftStart to $shiftEnd"
 
-                // --- 1. SHIFT UPDATE LOGIC (Naya) ---
                 holder.btnShift.setOnClickListener {
                     showShiftUpdateDialog(current)
                 }
 
-                // --- 2. DELETE LOGIC ---
-                // ManageDriversActivity.kt mein delete logic ko update karein
                 holder.btnDelete.setOnClickListener {
                     val builder = AlertDialog.Builder(this@ManageDriversActivity)
                     builder.setTitle("Delete Driver")
@@ -84,31 +80,23 @@ class ManageDriversActivity : AppCompatActivity() {
                         if (driverUid != null) {
                             val rootRef = FirebaseDatabase.getInstance().reference
                             val updates = HashMap<String, Any?>()
-
-                            // 1. Driver ko users list se nikalna
                             updates["users/$driverUid"] = null
-
-                            // 2. Agar koi bus assign thi, to usay free karna
                             if (!busId.isNullOrEmpty() && busId != "Not Assigned") {
                                 updates["buses/$busId/isAssigned"] = false
                                 updates["buses/$busId/assignedDriverId"] = "Not Assigned"
                                 updates["buses/$busId/assignedDriverName"] = "Not Assigned"
                             }
 
-                            // 3. Students ka data update karne ke liye query
                             rootRef.child("students").orderByChild("driverId").equalTo(driverUid)
                                 .addListenerForSingleValueEvent(object : ValueEventListener {
                                     override fun onDataChange(snapshot: DataSnapshot) {
                                         for (studentSnap in snapshot.children) {
                                             val studentId = studentSnap.key
                                             if (studentId != null) {
-                                                // Student ke record se driver info hatana
                                                 updates["students/$studentId/driverId"] = "Not Assigned"
                                                 updates["students/$studentId/driverName"] = "Not Assigned"
                                             }
                                         }
-
-                                        // Atomic Update: Sab kaam aik sath database mein honge
                                         rootRef.updateChildren(updates).addOnSuccessListener {
                                             Toast.makeText(this@ManageDriversActivity, "Driver and linked data removed successfully", Toast.LENGTH_SHORT).show()
                                         }.addOnFailureListener {
@@ -125,7 +113,7 @@ class ManageDriversActivity : AppCompatActivity() {
                     builder.show()
                 }
 
-                // --- 3. EDIT LOGIC ---
+
                 holder.btnEdit.setOnClickListener {
                     val intent = Intent(this@ManageDriversActivity, AddDriverActivity::class.java)
                     intent.putExtra("action", "edit")
@@ -141,8 +129,6 @@ class ManageDriversActivity : AppCompatActivity() {
         }
         rvDrivers.adapter = driverAdapter
     }
-
-    // --- NAYA FUNCTION: Dialog Box Open Karna ---
     private fun showShiftUpdateDialog(driver: DriverModel) {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_update_shift, null)
         val builder = AlertDialog.Builder(this)
@@ -159,14 +145,10 @@ class ManageDriversActivity : AppCompatActivity() {
         etStart.setText(driver.shiftStart)
         etEnd.setText(driver.shiftEnd)
 
-        // --- NAYA HISSA: Time Picker Logic ---
-
-        // Start Time Click Listener
         etStart.setOnClickListener {
             showTimePicker(etStart)
         }
 
-        // End Time Click Listener
         etEnd.setOnClickListener {
             showTimePicker(etEnd)
         }
@@ -180,7 +162,6 @@ class ManageDriversActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Firebase update logic wahi rahegi
             driver.uid?.let { uid ->
                 val updates = mapOf(
                     "shiftStart" to startStr,
@@ -195,7 +176,6 @@ class ManageDriversActivity : AppCompatActivity() {
         alertDialog.show()
     }
 
-    // Helper Function: Time Picker show karne aur format karne ke liye
     private fun showTimePicker(editText: TextInputEditText) {
         val calendar = Calendar.getInstance()
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
@@ -203,16 +183,14 @@ class ManageDriversActivity : AppCompatActivity() {
 
         val timePickerDialog = TimePickerDialog(this, { _, selectedHour, selectedMinute ->
 
-            // 12-Hour format (AM/PM) mein convert karna
             val isPM = selectedHour >= 12
             val formattedHour = if (selectedHour % 12 == 0) 12 else selectedHour % 12
             val amPm = if (isPM) "PM" else "AM"
 
-            // Time ko 07:30 AM format mein string banana
             val timeString = String.format("%02d:%02d %s", formattedHour, selectedMinute, amPm)
             editText.setText(timeString)
 
-        }, currentHour, currentMinute, false) // false ka matlab hai 12-hour clock dikhao
+        }, currentHour, currentMinute, false)
 
         timePickerDialog.show()
     }
@@ -240,7 +218,7 @@ class ManageDriversActivity : AppCompatActivity() {
         val busInfo: TextView = itemView.findViewById(R.id.tv_assigned_bus_display)
 
         // Buttons
-        val btnShift: View = itemView.findViewById(R.id.iv_shift_driver) // NAYA VIEW LINK KIYA
+        val btnShift: View = itemView.findViewById(R.id.iv_shift_driver)
         val btnEdit: View = itemView.findViewById(R.id.iv_edit_driver)
         val btnDelete: View = itemView.findViewById(R.id.iv_delete_driver)
     }

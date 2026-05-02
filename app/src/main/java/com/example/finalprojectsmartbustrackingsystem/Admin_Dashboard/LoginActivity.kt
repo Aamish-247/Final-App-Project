@@ -71,7 +71,6 @@ class LoginActivity : AppCompatActivity() {
                                 return@addOnSuccessListener
                             }
 
-                            // FIX 2: Sahi class names ka use
                             when (role.lowercase()) {
                                 "admin" -> startActivity(Intent(this, AdminDashboard::class.java))
                                 "driver" -> startActivity(Intent(this, DriverDashboard::class.java))

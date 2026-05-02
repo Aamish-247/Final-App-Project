@@ -42,8 +42,6 @@ class ParentDashboard : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_parent_dashboard)
-
-        // 1. Request Notification Permission (Android 13+)
         checkNotificationPermission()
 
         auth = FirebaseAuth.getInstance()
@@ -113,11 +111,9 @@ class ParentDashboard : AppCompatActivity() {
                                 sendStatusNotification("🏠 Dropped Off!", "$sName has been dropped off safely.", 3)
                             }
                         }
-                        // Status ko save kar liya taake agli dafa compare kar sakein
                         previousStudentStatus = currentStatus
 
 
-                        // Colors ki logic (Jo humne pehle set ki thi)
                         when (currentStatus.lowercase()) {
                             "picked up", "pick_up", "picked_up" -> tvStudentStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
                             "dropped off", "drop_off", "dropped" -> tvStudentStatus.setTextColor(android.graphics.Color.parseColor("#2196F3"))
@@ -145,11 +141,11 @@ class ParentDashboard : AppCompatActivity() {
                 if (busSnap.exists()) {
                     isTripRunning = busSnap.child("isTripActive").getValue(Boolean::class.java) ?: false
 
-                    // 1. 🔥 FIX: Bus ID proper display with fallback
+
                     val bID = busSnap.child("busID").value?.toString() ?: busId
                     tvBusDetails.text = "Assigned Bus: $bID"
 
-                    // Notification Logic
+
                     if (isTripRunning && !isNotificationSent) {
                         startDistanceMonitor(busId)
                     }
@@ -193,7 +189,6 @@ class ParentDashboard : AppCompatActivity() {
     }
 
     private fun startDistanceMonitor(busId: String) {
-        // 🔥 IMPROVED: Stop_1 ki jagah pehla bacha (First stop) uthao
         dbRefRoutes.child(busId).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists() && snapshot.childrenCount > 0) {
@@ -223,7 +218,7 @@ class ParentDashboard : AppCompatActivity() {
                         val stopLoc = android.location.Location("Stop").apply { latitude = stopLat!!; longitude = stopLng!! }
 
                         val distance = busLoc.distanceTo(stopLoc)
-                        if (distance < 500) { // 500 Meters
+                        if (distance < 500) {
                             sendArrivalNotification()
                             isNotificationSent = true
                         }
@@ -263,7 +258,7 @@ class ParentDashboard : AppCompatActivity() {
         }
 
         val builder = androidx.core.app.NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(R.drawable.ic_bus) // Agar error aaye toh isay android.R.drawable.ic_dialog_info kar lijiye ga
+            .setSmallIcon(R.drawable.ic_bus)
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
@@ -275,7 +270,6 @@ class ParentDashboard : AppCompatActivity() {
     private fun listenForBroadcastAlerts() {
         val alertsRef = FirebaseDatabase.getInstance().getReference("broadcast_alerts")
 
-        // 🔥 addChildEventListener use kar rahe hain taake jaise hi NAYA child aaye, yeh catch kar le
         alertsRef.addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                 val timestamp = snapshot.child("timestamp").getValue(Long::class.java) ?: 0L
@@ -283,8 +277,6 @@ class ParentDashboard : AppCompatActivity() {
                 val type = snapshot.child("type").value?.toString() ?: "Alert"
                 val message = snapshot.child("message").value?.toString() ?: ""
 
-                // 1. Check: Kya yeh message app khulne ke BAAD aaya hai?
-                // 2. Check: Kya iski audience 'All' ya 'Parents Only' hai?
                 if (timestamp > appStartTime) {
                     if (audience == "All" || audience == "Parents Only") {
                         sendBroadcastNotification(type, message)
@@ -308,13 +300,13 @@ class ParentDashboard : AppCompatActivity() {
         }
 
         val builder = androidx.core.app.NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(android.R.drawable.ic_dialog_alert) // Broadcast icon
+            .setSmallIcon(android.R.drawable.ic_dialog_alert)
             .setContentTitle("📢 $type Alert")
             .setContentText(message)
-            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_MAX) // Sab se upar show hoga
+            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_MAX)
             .setAutoCancel(true)
 
-        notificationManager.notify(System.currentTimeMillis().toInt(), builder.build()) // Har message ki alag ID
+        notificationManager.notify(System.currentTimeMillis().toInt(), builder.build())
     }
     private fun showNoBusAssigned() {
         tvBusDetails.text = "Bus: Not Assigned"

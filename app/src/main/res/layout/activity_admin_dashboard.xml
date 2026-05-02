@@ -7,7 +7,7 @@
     android:padding="16dp"
     android:background="#F3F6FB">
 
-    <!-- Title -->
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -27,14 +27,14 @@
         android:gravity="center"
         android:layout_marginBottom="20dp"/>
 
-    <!-- GRID -->
+
     <GridLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:columnCount="2">
 
-        <!-- USER -->
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_manage_users"
             android:layout_width="0dp"
@@ -53,7 +53,7 @@
             app:iconSize="40dp"
             app:iconPadding="8dp"/>
 
-        <!-- BUS -->
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_manage_fleet"
             android:layout_width="0dp"
@@ -72,7 +72,7 @@
             app:iconSize="40dp"
             app:iconPadding="8dp"/>
 
-        <!-- MAP -->
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_live_tracking"
             android:layout_width="0dp"
@@ -91,7 +91,7 @@
             app:iconSize="40dp"
             app:iconPadding="8dp"/>
 
-        <!-- NOTIFICATION -->
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_send_alerts"
             android:layout_width="0dp"
@@ -112,7 +112,7 @@
 
     </GridLayout>
 
-    <!-- LOGOUT -->
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_logout"
         android:layout_width="match_parent"

@@ -74,7 +74,6 @@
                     app:tint="#4A90E2"/>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Delete Button -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="40dp"
                 android:layout_height="40dp"

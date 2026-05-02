@@ -8,7 +8,7 @@
     android:gravity="center"
     android:background="#F4F7FE">
 
-    <!-- Title -->
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -26,7 +26,7 @@
         android:textColor="#666666"
         android:layout_marginBottom="30dp"/>
 
-    <!-- Drivers -->
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_manage_drivers"
         android:layout_width="match_parent"
@@ -40,7 +40,7 @@
         android:layout_marginBottom="15dp"
         android:elevation="4dp"/>
 
-    <!-- Parents -->
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_manage_parents"
         android:layout_width="match_parent"
@@ -54,7 +54,7 @@
         android:layout_marginBottom="15dp"
         android:elevation="4dp"/>
 
-    <!-- Assign Students -->
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_assign_students"
         android:layout_width="match_parent"

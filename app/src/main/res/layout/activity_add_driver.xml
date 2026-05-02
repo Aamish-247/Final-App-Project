@@ -11,7 +11,7 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <!-- Title -->
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -22,7 +22,7 @@
             android:gravity="center"
             android:layout_marginBottom="20dp"/>
 
-        <!-- Card -->
+
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -36,7 +36,7 @@
                 android:orientation="vertical"
                 android:padding="20dp">
 
-                <!-- Name -->
+
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -56,7 +56,7 @@
                         android:paddingStart="12dp"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Email -->
+
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -76,7 +76,7 @@
                         android:paddingStart="12dp"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Phone -->
+
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -96,7 +96,7 @@
                         android:paddingStart="12dp"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Password -->
+
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -119,7 +119,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Button -->
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_save_driver"
             android:layout_width="match_parent"

@@ -107,4 +107,20 @@
         app:icon="@android:drawable/ic_dialog_alert"
         app:iconGravity="textStart"/>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_driver_logout"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="16dp"
+        android:text="Logout"
+        android:textSize="20sp"
+        app:cornerRadius="16dp"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:textColor="#D32F2F"
+        app:strokeColor="#D32F2F"
+        app:strokeWidth="2dp"
+        app:icon="@android:drawable/ic_lock_power_off"
+        app:iconTint="#D32F2F"
+        app:iconGravity="textStart"/>
+
 </LinearLayout>

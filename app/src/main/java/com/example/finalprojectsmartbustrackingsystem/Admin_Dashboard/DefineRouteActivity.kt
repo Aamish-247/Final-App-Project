@@ -34,15 +34,14 @@ class DefineRouteActivity : AppCompatActivity() {
     private lateinit var btnClear: MaterialButton
     private lateinit var btnSave: MaterialButton
 
-    private val busMap = HashMap<String, String>() // Bus Name -> Bus ID
-    private val routePoints = ArrayList<GeoPoint>() // Jo pins map par lagengi
+    private val busMap = HashMap<String, String>()
+    private val routePoints = ArrayList<GeoPoint>()
 
     private var selectedBusId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // OSM Configuration (Modern way to handle shared preferences for OSMDroid)
         val sharedPrefs = getSharedPreferences("osmdroid", Context.MODE_PRIVATE)
         Configuration.getInstance().load(this, sharedPrefs)
 
@@ -59,19 +58,15 @@ class DefineRouteActivity : AppCompatActivity() {
         setupMap()
         loadBuses()
 
-        // Jab admin koi Bus select kare
+
         spinnerBus.setOnItemClickListener { _, _, position, _ ->
             val selectedBusName = spinnerBus.adapter.getItem(position).toString()
             selectedBusId = busMap[selectedBusName]
 
-            // Purana map data saaf karo
             clearMapData()
-
-            // Firebase se is bus ka route load karo
             loadExistingRoute(selectedBusId!!)
         }
 
-        // Clear Map Button Logic
         btnClear.setOnClickListener {
             if (selectedBusId != null) {
                 val builder = AlertDialog.Builder(this)
@@ -80,11 +75,8 @@ class DefineRouteActivity : AppCompatActivity() {
 
                 builder.setPositiveButton("Yes, Delete") { dialog, _ ->
                     val updates = HashMap<String, Any?>()
-
-                    // 1. 'routes' node se is bus ka data delete karna (null pass karke)
                     updates["routes/${selectedBusId!!}"] = null
 
-                    // 2. 'buses' node mein wapis "Not Assigned" set karna
                     updates["buses/${selectedBusId!!}/assignedRoute"] = "Not Assigned"
 
                     dbRef.updateChildren(updates)
@@ -110,7 +102,6 @@ class DefineRouteActivity : AppCompatActivity() {
             }
         }
 
-        // Save Route Button Click Listener (FIXED)
         btnSave.setOnClickListener {
             if (selectedBusId == null) {
                 Toast.makeText(this, "Please select a Bus first", Toast.LENGTH_SHORT).show()
@@ -233,7 +224,7 @@ class DefineRouteActivity : AppCompatActivity() {
     }
 
     private fun saveRouteToFirebase() {
-        val updates = HashMap<String, Any?>() // Any? isliye use kiya taake aage delete mein null de sakein
+        val updates = HashMap<String, Any?>()
         val routeData = HashMap<String, Any>()
 
         for ((index, point) in routePoints.withIndex()) {
@@ -244,13 +235,11 @@ class DefineRouteActivity : AppCompatActivity() {
             routeData["stop_${index + 1}"] = stopData
         }
 
-        // 1. Route ka data 'routes' node mein save karna
+
         updates["routes/${selectedBusId!!}"] = routeData
 
-        // 2. Bus ke node mein assignedRoute ko update karna
         updates["buses/${selectedBusId!!}/assignedRoute"] = "Assigned"
 
-        // updateChildren se dono nodes ek sath update honge
         dbRef.updateChildren(updates)
             .addOnSuccessListener {
                 Toast.makeText(this, "Route saved successfully for this Bus!", Toast.LENGTH_LONG).show()

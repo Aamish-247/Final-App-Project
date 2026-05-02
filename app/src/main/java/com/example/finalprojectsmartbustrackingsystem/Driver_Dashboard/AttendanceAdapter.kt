@@ -35,7 +35,7 @@ class AttendanceAdapter(private val studentList: ArrayList<StudentModel>) :
         holder.tvStops.text = "Pickup: ${student.pickupStop} | Dropoff: ${student.dropoffStop}"
         holder.tvStatus.text = "Status: ${student.attendanceStatus}"
 
-        // UI Colors based on status
+
         when (student.attendanceStatus) {
             "Picked Up" -> holder.tvStatus.setTextColor(Color.parseColor("#4CAF50")) // Green
             "Dropped Off" -> holder.tvStatus.setTextColor(Color.parseColor("#2196F3")) // Blue
@@ -43,7 +43,7 @@ class AttendanceAdapter(private val studentList: ArrayList<StudentModel>) :
             else -> holder.tvStatus.setTextColor(Color.parseColor("#FF9800")) // Orange for Pending
         }
 
-        // Database Update Logic
+
         val dbRef = FirebaseDatabase.getInstance().getReference("students").child(student.studentId!!)
 
         holder.btnPick.setOnClickListener {

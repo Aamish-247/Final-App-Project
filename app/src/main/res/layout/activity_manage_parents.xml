@@ -7,7 +7,7 @@
     android:padding="16dp"
     android:background="#F4F7FE">
 
-    <!-- Title -->
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -27,7 +27,7 @@
         android:gravity="center"
         android:layout_marginBottom="16dp"/>
 
-    <!-- RecyclerView Card -->
+
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -43,7 +43,7 @@
             android:padding="8dp"/>
     </androidx.cardview.widget.CardView>
 
-    <!-- Add Button -->
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_add_new_parent"
         android:layout_width="match_parent"

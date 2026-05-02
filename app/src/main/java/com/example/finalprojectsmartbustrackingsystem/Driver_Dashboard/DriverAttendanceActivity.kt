@@ -16,7 +16,6 @@ class DriverAttendanceActivity : AppCompatActivity() {
     private lateinit var adapter: AttendanceAdapter
     private lateinit var dbRef: DatabaseReference
 
-    // Yahan intent se driver ki current busId mangwayenge
     private var currentBusId: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,7 +29,6 @@ class DriverAttendanceActivity : AppCompatActivity() {
         adapter = AttendanceAdapter(studentList)
         rvAttendance.adapter = adapter
 
-        // ActiveTripActivity ya intent se busId receive karein
         currentBusId = intent.getStringExtra("BUS_ID") ?: ""
 
         if (currentBusId.isNotEmpty()) {
@@ -43,10 +41,8 @@ class DriverAttendanceActivity : AppCompatActivity() {
     private fun fetchStudentsForThisBus() {
         dbRef = FirebaseDatabase.getInstance().getReference("students")
 
-        // QUERY: Sirf is bus ke bache filter kar ke laao
         val query = dbRef.orderByChild("busId").equalTo(currentBusId)
 
-        // addValueEventListener use kar rahe hain taake jaise hi status update ho, list foran refresh ho jaye
         query.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 studentList.clear()

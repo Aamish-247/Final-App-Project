@@ -37,16 +37,16 @@ class ParentLiveTrackingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // OSMDroid Configuration Fix
+
         val ctx = applicationContext
         Configuration.getInstance().load(ctx, ctx.getSharedPreferences("osmdroid", MODE_PRIVATE))
 
         setContentView(R.layout.activity_parent_live_tracking)
 
-        // Intent se Bus ID lena
+
         busId = intent.getStringExtra("BUS_ID") ?: ""
 
-        // UI Binding
+
         map = findViewById(R.id.map_parent_live_tracking)
         tvLiveBusName = findViewById(R.id.tv_live_bus_name)
         tvLiveStatus = findViewById(R.id.tv_live_status)
@@ -85,7 +85,6 @@ class ParentLiveTrackingActivity : AppCompatActivity() {
                 if (snapshot.exists() && snapshot.childrenCount > 0) {
                     val stopsList = snapshot.children.toList()
 
-                    // 1. Pickup Stop (Start) - BLUE PIN
                     val firstStop = stopsList.first()
                     val lat1 = firstStop.child("latitude").value.toString().toDoubleOrNull()
                     val lng1 = firstStop.child("longitude").value.toString().toDoubleOrNull()
@@ -96,7 +95,7 @@ class ParentLiveTrackingActivity : AppCompatActivity() {
                         map.controller.setCenter(studentStopLocation)
                     }
 
-                    // 2. Drop-off Stop (End) - RED PIN
+
                     if (stopsList.size > 1) {
                         val lastStop = stopsList.last()
                         val lat2 = lastStop.child("latitude").value.toString().toDoubleOrNull()

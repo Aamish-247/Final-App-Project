@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.graphics.toColorInt
+import com.example.finalprojectsmartbustrackingsystem.Admin_Dashboard.LoginActivity
 
 class DriverDashboard : AppCompatActivity() {
 
@@ -22,6 +23,7 @@ class DriverDashboard : AppCompatActivity() {
     private lateinit var tvShiftTiming: TextView
     private lateinit var btnStartTrip: MaterialButton
     private lateinit var btnSOS: MaterialButton
+    private lateinit var btnLogout: MaterialButton
 
     private var currentBusId: String? = null
     private var isTripRunning: Boolean = false
@@ -40,6 +42,7 @@ class DriverDashboard : AppCompatActivity() {
         tvShiftTiming = findViewById(R.id.tv_shift_timing)
         btnStartTrip = findViewById(R.id.btn_start_trip)
         btnSOS = findViewById(R.id.btn_sos_emergency)
+        btnLogout = findViewById(R.id.btn_driver_logout)
 
         fetchDriverDetails()
         listenForBroadcastAlerts()
@@ -66,6 +69,17 @@ class DriverDashboard : AppCompatActivity() {
             } else {
                 Toast.makeText(this, "No Active Trip", Toast.LENGTH_LONG).show()
             }
+        }
+        btnLogout.setOnClickListener {
+            auth.signOut()
+
+
+            val intent = Intent(this, LoginActivity::class.java)
+
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+            startActivity(intent)
+            finish()
         }
     }
 
@@ -161,8 +175,6 @@ class DriverDashboard : AppCompatActivity() {
     }
     private fun listenForBroadcastAlerts() {
         val alertsRef = FirebaseDatabase.getInstance().getReference("broadcast_alerts")
-
-        // 🔥 addChildEventListener use kar rahe hain taake jaise hi NAYA child aaye, yeh catch kar le
         alertsRef.addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                 val timestamp = snapshot.child("timestamp").getValue(Long::class.java) ?: 0L
@@ -170,8 +182,6 @@ class DriverDashboard : AppCompatActivity() {
                 val type = snapshot.child("type").value?.toString() ?: "Alert"
                 val message = snapshot.child("message").value?.toString() ?: ""
 
-                // 1. Check: Kya yeh message app khulne ke BAAD aaya hai?
-                // 2. Check: Kya iski audience 'All' ya 'Parents Only' hai?
                 if (timestamp > appStartTime) {
                     if (audience == "All" || audience == "Drivers Only")
                     {
@@ -196,10 +206,10 @@ class DriverDashboard : AppCompatActivity() {
         }
 
         val builder = androidx.core.app.NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(android.R.drawable.ic_dialog_alert) // Broadcast icon
+            .setSmallIcon(android.R.drawable.ic_dialog_alert)
             .setContentTitle("📢 $type Alert")
             .setContentText(message)
-            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_MAX) // Sab se upar show hoga
+            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_MAX)
             .setAutoCancel(true)
 
         notificationManager.notify(System.currentTimeMillis().toInt(), builder.build()) // Har message ki alag ID

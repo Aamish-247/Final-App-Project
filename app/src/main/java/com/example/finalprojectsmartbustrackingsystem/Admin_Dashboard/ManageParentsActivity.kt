@@ -119,11 +119,8 @@ class ManageParentsActivity : AppCompatActivity() {
                             updates["students/${studentSnap.key}"] = null
                         }
                     }
-
-                    // 2. Parent ko users node se delete karo
                     updates["users/$parentId"] = null
 
-                    // 3. Ek hi atomic operation mein sab delete karein
                     rootRef.updateChildren(updates).addOnSuccessListener {
                         Toast.makeText(this@ManageParentsActivity, "Parent and linked students removed successfully", Toast.LENGTH_SHORT).show()
                     }.addOnFailureListener {

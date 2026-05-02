@@ -37,29 +37,28 @@ class ActiveTripActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // OSMDroid Configuration load karna
         Configuration.getInstance().load(this, getSharedPreferences("osmdroid", MODE_PRIVATE))
         setContentView(R.layout.activity_active_trip)
 
-        // Intent se Bus ID lena
+
         busId = intent.getStringExtra("BUS_ID")
         dbRef = FirebaseDatabase.getInstance().reference
         map = findViewById(R.id.mapview)
 
         setupMap()
 
-        // 1. Database se Route fetch karke line draw karna
+
         if (busId != null) {
             fetchRouteAndDraw(busId!!)
         }
 
-        // 2. Location Client Setup
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         setupLocationCallback()
         startLocationUpdates()
         updateLocationInFirebase(33.6844, 73.0479)
 
-        // 3. Recenter Button Logic (Aapke XML mein btn_recenter ID honi chahiye)
+
         findViewById<View>(R.id.btn_recenter).setOnClickListener {
             routeStartPoint?.let { point ->
                 map.controller.animateTo(point)
@@ -67,7 +66,7 @@ class ActiveTripActivity : AppCompatActivity() {
             } ?: Toast.makeText(this, "Route not found", Toast.LENGTH_SHORT).show()
         }
 
-        // 4. End Trip Button
+
         findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_end_trip).setOnClickListener {
             showEndConfirmation()
         }
@@ -75,7 +74,7 @@ class ActiveTripActivity : AppCompatActivity() {
         val btnAttendance = findViewById<View>(R.id.btn_active_attendance)
         btnAttendance.setOnClickListener {
             if (busId != null) {
-                // Agar bus ID mojood hai toh Attendance Activity kholo
+
                 val intent = Intent(this, DriverAttendanceActivity::class.java)
                 intent.putExtra("BUS_ID", busId)
                 startActivity(intent)
@@ -106,7 +105,7 @@ class ActiveTripActivity : AppCompatActivity() {
                     }
 
                     if (points.isNotEmpty()) {
-                        // 1. Blue Line (Polyline) Draw Karna
+
                         routePolyline.setPoints(points)
                         routePolyline.outlinePaint.color = Color.BLUE
                         routePolyline.outlinePaint.strokeWidth = 12f
@@ -119,7 +118,7 @@ class ActiveTripActivity : AppCompatActivity() {
 
                             when (i) {
                                 0 -> {
-                                    // START POINT: Green Marker
+
                                     marker.title = "Start (Stop 1)"
                                     val startIcon = ContextCompat.getDrawable(this@ActiveTripActivity, R.drawable.ic_custom_pin)?.mutate()
                                     startIcon?.setTint(Color.GREEN)
@@ -127,7 +126,7 @@ class ActiveTripActivity : AppCompatActivity() {
                                     routeStartPoint = points[i]
                                 }
                                 points.size - 1 -> {
-                                    // END POINT: Red Marker
+
                                     marker.title = "Last Stop"
                                     val endIcon = ContextCompat.getDrawable(this@ActiveTripActivity, R.drawable.ic_custom_pin)?.mutate()
                                     endIcon?.setTint(Color.RED)
@@ -159,8 +158,6 @@ class ActiveTripActivity : AppCompatActivity() {
             override fun onLocationResult(locationResult: LocationResult) {
                 for (location in locationResult.locations) {
                     currentDriverPoint = GeoPoint(location.latitude, location.longitude)
-
-                    // Firebase mein real-time location update bhejna
                     updateLocationInFirebase(location.latitude, location.longitude)
                 }
             }
@@ -224,7 +221,6 @@ class ActiveTripActivity : AppCompatActivity() {
             updates["buses/$busId/lastLng"] = currentDriverPoint!!.longitude
         }
 
-        // Live location ko remove karna
         dbRef.child("live_locations").child(busId!!).removeValue()
 
         dbRef.updateChildren(updates).addOnSuccessListener {
