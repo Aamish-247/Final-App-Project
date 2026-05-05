@@ -76,17 +76,6 @@ The project follows the **MVVM (Model-View-ViewModel)** architectural pattern, e
 
 ---
 
-## 📸 Screenshots
-*(Add your app screenshots here to showcase the UI)*
-
-<p align="center">
-  <img src="https://via.placeholder.com/200x400?text=Admin+Dashboard" width="200">
-  <img src="https://via.placeholder.com/200x400?text=Driver+Navigation" width="200">
-  <img src="https://via.placeholder.com/200x400?text=Parent+Tracking" width="200">
-</p>
-
----
-
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -97,7 +86,7 @@ The project follows the **MVVM (Model-View-ViewModel)** architectural pattern, e
 ### Setup Instructions
 1. **📥 Clone the repository:**
    ```bash
-   git clone <[repository-url](https://github.com/Aamish-247/Final-App-Project)>
+   git clone https://github.com/Aamish-247/Final-App-Project
    ```
 2. **🏗️ Open in Android Studio:**
    Load the project and let Gradle sync.
