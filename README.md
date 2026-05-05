@@ -97,7 +97,7 @@ The project follows the **MVVM (Model-View-ViewModel)** architectural pattern, e
 ### Setup Instructions
 1. **📥 Clone the repository:**
    ```bash
-   git clone <repository-url>
+   git clone <[repository-url](https://github.com/Aamish-247/Final-App-Project)>
    ```
 2. **🏗️ Open in Android Studio:**
    Load the project and let Gradle sync.
