@@ -1,4 +1,4 @@
-# 🚌 Smart Bus Tracking System 🚀
+# 🚌 Smart School Bus Tracking System 
 
 <p align="center">
   <img src="School_Bus_Images-removebg-preview.png" width="250" alt="App Logo">
