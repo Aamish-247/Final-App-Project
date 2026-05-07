@@ -10,12 +10,14 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.database.FirebaseDatabase
 import kotlin.random.Random
 
-class AddBusActivity : AppCompatActivity() {
+class AddBusActivity : AppCompatActivity()
+{
 
     private var isEditMode = false
     private var editBusId: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_bus)
 
@@ -26,7 +28,8 @@ class AddBusActivity : AppCompatActivity() {
 
 
         val action = intent.getStringExtra("action")
-        if (action == "edit") {
+        if (action == "edit")
+        {
             isEditMode = true
             editBusId = intent.getStringExtra("busId")
 
@@ -47,9 +50,12 @@ class AddBusActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            if (isEditMode) {
+            if (isEditMode)
+            {
                 updateBusInDatabase(name, plate, capacity)
-            } else {
+            }
+            else
+            {
                 saveBusToDatabase(name, plate, capacity)
             }
         }
